@@ -1,0 +1,135 @@
+{
+  "name": "Kindard",
+  "short_name": "Kindard",
+  "description": "Kindard – official web application",
+  "start_url": "http://kindard.com",
+  "scope": "/",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": [],
+  "icons": [
+    {
+      "src": "https://kindard.com/assets/img/kindard_icon.png",
+      "type": "image/png",
+      "sizes": "1230x1233",
+      "purpose": "any"
+    },
+    {
+      "src": "https://kindard.com/assets/img/kindard_icon.png",
+      "type": "image/png",
+      "sizes": "1230x1233",
+      "purpose": "maskable"
+    },
+    {
+      "src": "https://kindard.com/assets/img/kindard_icon.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://kindard.com/assets/img/kindard_icon.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://kindard.com/assets/img/kindard_icon.png",
+      "type": "image/png",
+      "sizes": "180x180",
+      "purpose": "any"
+    },
+    {
+      "src": "https://kindard.com/assets/img/kindard_icon.png",
+      "type": "image/png",
+      "sizes": "167x167",
+      "purpose": "any"
+    },
+    {
+      "src": "https://kindard.com/assets/img/kindard_icon.png",
+      "type": "image/png",
+      "sizes": "152x152",
+      "purpose": "any"
+    },
+    {
+      "src": "https://kindard.com/assets/img/kindard_icon.png",
+      "type": "image/png",
+      "sizes": "144x144",
+      "purpose": "any"
+    },
+    {
+      "src": "https://kindard.com/assets/img/kindard_icon.png",
+      "type": "image/png",
+      "sizes": "128x128",
+      "purpose": "any"
+    },
+    {
+      "src": "https://kindard.com/assets/img/kindard_icon.png",
+      "type": "image/png",
+      "sizes": "96x96",
+      "purpose": "any"
+    },
+    {
+      "src": "https://kindard.com/assets/img/kindard_icon.png",
+      "type": "image/png",
+      "sizes": "72x72",
+      "purpose": "any"
+    },
+    {
+      "src": "https://kindard.com/assets/img/kindard_icon.png",
+      "type": "image/png",
+      "sizes": "48x48",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "https://kindard.com/assets/img/kindard_icon.png",
+      "type": "image/png",
+      "sizes": "1230x1233",
+      "form_factor": "wide",
+      "label": "Kindard – Desktop"
+    },
+    {
+      "src": "https://kindard.com/assets/img/kindard_icon.png",
+      "type": "image/png",
+      "sizes": "1230x1233",
+      "form_factor": "narrow",
+      "label": "Kindard – Mobile"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Home",
+      "short_name": "Home",
+      "description": "Go to the Kindard homepage",
+      "url": "/",
+      "icons": [
+        {
+          "src": "https://kindard.com/assets/img/kindard_icon.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "iarc_rating_id": "",
+  "share_target": {
+    "action": "/share",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "protocol_handlers": [],
+  "edge_side_panel": {
+    "preferred_width": 400
+  }
+}
