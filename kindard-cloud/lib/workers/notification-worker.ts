@@ -34,7 +34,7 @@ export async function runNotificationWorker(): Promise<WorkerResult> {
         },
       });
 
-      const emailBody = alerts.map((a) => `[${a.alert_type.toUpperCase()}] From ${a.worker_name}: ${a.message}`).join("\\n\\n");
+      const emailBody = alerts.map((a) => `[${String(a.alert_type).toUpperCase()}] From ${a.worker_name}: ${a.message}`).join("\\n\\n");
       
       try {
         await transporter.sendMail({

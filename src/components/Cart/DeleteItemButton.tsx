@@ -7,7 +7,8 @@ import { XIcon } from 'lucide-react'
 import React from 'react'
 
 export function DeleteItemButton({ item }: { item: CartItem }) {
-  const { isLoading, removeItem } = useCart()
+  const { hasInitializedCart, deleteItemFromCart } = useCart()
+  const isLoading = !hasInitializedCart
   const itemId = item.id
 
   return (
@@ -23,7 +24,7 @@ export function DeleteItemButton({ item }: { item: CartItem }) {
         disabled={!itemId || isLoading}
         onClick={(e: React.FormEvent<HTMLButtonElement>) => {
           e.preventDefault()
-          if (itemId) removeItem(itemId)
+          if (itemId) deleteItemFromCart({ id: itemId })
         }}
         type="button"
       >

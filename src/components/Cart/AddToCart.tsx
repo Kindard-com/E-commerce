@@ -13,7 +13,8 @@ type Props = {
 }
 
 export function AddToCart({ product }: Props) {
-  const { addItem, cart, isLoading } = useCart()
+  const { addItemToCart, cart, hasInitializedCart } = useCart()
+  const isLoading = !hasInitializedCart
   const searchParams = useSearchParams()
 
   const variants = product.variants?.docs || []
@@ -41,14 +42,14 @@ export function AddToCart({ product }: Props) {
     (e: React.FormEvent<HTMLButtonElement>) => {
       e.preventDefault()
 
-      addItem({
+      addItemToCart({
         product: product.id,
         variant: selectedVariant?.id ?? undefined,
       }).then(() => {
         toast.success('Item added to cart.')
       })
     },
-    [addItem, product, selectedVariant],
+    [addItemToCart, product, selectedVariant],
   )
 
   const disabled = useMemo<boolean>(() => {

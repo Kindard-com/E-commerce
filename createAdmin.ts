@@ -1,7 +1,5 @@
 import { getPayload } from 'payload'
-import dotenv from 'dotenv'
-
-dotenv.config()
+import 'dotenv/config'
 
 async function main() {
   const { default: config } = await import('./src/payload.config')

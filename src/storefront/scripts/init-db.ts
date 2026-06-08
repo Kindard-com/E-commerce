@@ -1,5 +1,5 @@
 import { createClient } from "@libsql/client";
-import dotenv from "dotenv";
+import "dotenv/config";
 import path from "path";
 
 // Load environment variables from .env.local

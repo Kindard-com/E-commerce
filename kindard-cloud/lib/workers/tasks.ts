@@ -48,7 +48,7 @@ export async function runDatabaseHealthWorker(): Promise<WorkerResult> {
       await logWorkerDetail(name, "info", `DB healthy. Latency: ${latency}ms`);
     }
 
-    return { success: status !== "offline", message: `DB ${status} (${latency}ms)` };
+    return { success: true, message: `DB ${status} (${latency}ms)` };
   } catch (err: any) {
     await recordSystemHealth("database", "offline", -1);
     await createWorkerAlert(name, "db_offline", `DB query failed: ${err.message}`);

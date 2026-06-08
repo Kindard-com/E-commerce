@@ -22,12 +22,12 @@ export function Sidebar() {
       </div>
       <div className="sidebar-section">
         <div className="sidebar-title"><span>Size</span></div>
-        <a href="#" className="sidebar-item">XS</a>
-        <a href="#" className="sidebar-item">S</a>
-        <a href="#" className="sidebar-item">M</a>
-        <a href="#" className="sidebar-item">L</a>
-        <a href="#" className="sidebar-item">XL</a>
-        <a href="#" className="sidebar-item">XXL</a>
+        <a href="#" className="sidebar-item">2-3 Yrs (XS)</a>
+        <a href="#" className="sidebar-item">4-5 Yrs (S)</a>
+        <a href="#" className="sidebar-item">6-7 Yrs (M)</a>
+        <a href="#" className="sidebar-item">8-9 Yrs (L)</a>
+        <a href="#" className="sidebar-item">10-11 Yrs (XL)</a>
+        <a href="#" className="sidebar-item">12-13 Yrs (XXL)</a>
       </div>
       <div className="sidebar-section">
         <div className="sidebar-title"><span>Price</span></div>

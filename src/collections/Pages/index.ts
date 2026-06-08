@@ -10,6 +10,8 @@ import { CallToAction } from '@/blocks/CallToAction/config'
 import { Content } from '@/blocks/Content/config'
 import { FormBlock } from '@/blocks/Form/config'
 import { MediaBlock } from '@/blocks/MediaBlock/config'
+import { TicketFormBlock } from '@/blocks/TicketForm/config'
+import { HelpCenterBlock } from '@/blocks/HelpCenter/config'
 import { hero } from '@/fields/hero'
 import { slugField } from 'payload'
 import { adminOrPublishedStatus } from '@/access/adminOrPublishedStatus'
@@ -97,6 +99,8 @@ export const Pages: CollectionConfig = {
                 ThreeItemGrid,
                 Banner,
                 FormBlock,
+                TicketFormBlock,
+                HelpCenterBlock,
               ],
               required: true,
             },

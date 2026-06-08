@@ -157,14 +157,20 @@ export function Footer() {
           <Link href="/terms-of-service" className="footer-legal-link">Terms of Service</Link>
           <Link href="/cookie-settings" className="footer-legal-link">Cookie Settings</Link>
         </div>
-        <div className="footer-payments">
-          <div className="pay-chip"><span>VISA</span></div>
-          <div className="pay-chip"><span>MC</span></div>
-          <div className="pay-chip"><span>AMEX</span></div>
-          <div className="pay-chip"><span>PAYPAL</span></div>
-          <div className="pay-chip"><span>KLARNA</span></div>
-          <div className="pay-chip"><span>APPLE PAY</span></div>
-          <div className="pay-chip"><span>G PAY</span></div>
+        <div className="footer-payments" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--mid)', fontSize: '12px' }}>
+            <span>Secure payments by</span>
+            <img src="/img/payment/mollie-logo.svg" alt="Mollie" style={{ height: '14px', marginTop: '2px' }} />
+          </div>
+          <div style={{ display: 'flex', gap: '6px' }}>
+            <img src="/img/payment/ideal.svg" alt="iDEAL" style={{ height: '24px' }} />
+            <img src="/img/payment/bancontact.svg" alt="Bancontact" style={{ height: '24px' }} />
+            <img src="/img/payment/visa.svg" alt="Visa" style={{ height: '24px' }} />
+            <img src="/img/payment/mastercard.svg" alt="Mastercard" style={{ height: '24px' }} />
+            <img src="/img/payment/amex.svg" alt="Amex" style={{ height: '24px' }} />
+            <img src="/img/payment/klarna.svg" alt="Klarna" style={{ height: '24px' }} />
+            <img src="/img/payment/apple-pay.svg" alt="Apple Pay" style={{ height: '24px' }} />
+          </div>
         </div>
       </div>
     </footer>

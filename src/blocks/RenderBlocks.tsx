@@ -6,6 +6,8 @@ import { ContentBlock } from '@/blocks/Content/Component'
 import { FormBlock } from '@/blocks/Form/Component'
 import { MediaBlock } from '@/blocks/MediaBlock/Component'
 import { ThreeItemGridBlock } from '@/blocks/ThreeItemGrid/Component'
+import { TicketFormBlock } from '@/blocks/TicketForm/Component'
+import { HelpCenterBlock } from '@/blocks/HelpCenter/Component'
 import { toKebabCase } from '@/utilities/toKebabCase'
 import React, { Fragment } from 'react'
 
@@ -19,7 +21,9 @@ const blockComponents = {
   cta: CallToActionBlock,
   formBlock: FormBlock,
   mediaBlock: MediaBlock,
+  ticketForm: TicketFormBlock,
   threeItemGrid: ThreeItemGridBlock,
+  helpCenter: HelpCenterBlock,
 }
 
 export const RenderBlocks: React.FC<{

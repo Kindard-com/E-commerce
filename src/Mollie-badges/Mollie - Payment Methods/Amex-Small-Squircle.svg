@@ -1,0 +1,17 @@
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_2180_577)">
+<rect width="16" height="16" rx="4" fill="#016FD0" style="fill:#016FD0;fill:color(display-p3 0.0039 0.4353 0.8157);fill-opacity:1;"/>
+<path d="M0 16H16V0H0V16Z" fill="#006FCF" style="fill:#006FCF;fill:color(display-p3 0.0000 0.4353 0.8118);fill-opacity:1;"/>
+<path d="M5.79602 13.4683L12.1226 13.4817L13.1162 12.3732L14.1169 13.4775H15.9999V11.8603L14.8205 10.5884L15.9999 9.32803V7.7444L5.79602 7.73524V13.4683Z" fill="white" style="fill:white;fill-opacity:1;"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M6.47766 12.8397V8.36612H10.2709V9.39667H7.70577V10.0962H10.2097V11.1097H7.70577V11.7968H10.2709V12.8397L6.47766 12.8397Z" fill="#006FCF" style="fill:#006FCF;fill:color(display-p3 0.0000 0.4353 0.8118);fill-opacity:1;"/>
+<path d="M14.4452 8.36617L13.159 9.7841L11.8764 8.36617H10.2518L12.3508 10.6004L10.2519 12.8397H11.8323L13.1242 11.4076L14.4295 12.8397H16V12.7762L13.9457 10.6004L16 8.40141V8.36617H14.4452Z" fill="#006FCF" style="fill:#006FCF;fill:color(display-p3 0.0000 0.4353 0.8118);fill-opacity:1;"/>
+<path d="M13.6813 2.64657L13.1558 4.11631L12.6322 2.64657H9.5956V4.60824L8.73165 2.64657H6.27198L3.74579 8.37965H16V2.64657H13.6813Z" fill="white" style="fill:white;fill-opacity:1;"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M6.90827 5.84103L7.50355 4.41812L8.09842 5.84103H6.90827ZM6.73768 3.26942L4.75273 7.73924H6.11418L6.48862 6.8442H8.51779L8.892 7.73924H10.2873L8.31055 3.26942H6.73768Z" fill="#006FCF" style="fill:#006FCF;fill:color(display-p3 0.0000 0.4353 0.8118);fill-opacity:1;"/>
+<path d="M10.2687 7.73849L11.4723 7.73851V4.66819L12.6142 7.73851H13.6961L14.8148 4.67862V7.74894L16 7.73851V3.26871H14.1581L13.1671 6.02323L12.1824 3.2753L10.2687 3.26869V7.73849Z" fill="#006FCF" style="fill:#006FCF;fill:color(display-p3 0.0000 0.4353 0.8118);fill-opacity:1;"/>
+</g>
+<defs>
+<clipPath id="clip0_2180_577">
+<rect width="16" height="16" rx="4" fill="white" style="fill:white;fill-opacity:1;"/>
+</clipPath>
+</defs>
+</svg>

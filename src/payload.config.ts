@@ -1,4 +1,5 @@
 import { sqliteAdapter } from '@payloadcms/db-sqlite'
+import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import {
   BoldFeature,
   EXPERIMENTAL_TableFeature,
@@ -27,6 +28,8 @@ import { plugins } from './plugins'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+import { SupportTickets } from '@/collections/SupportTickets'
+
 export default buildConfig({
   admin: {
     components: {
@@ -39,13 +42,13 @@ export default buildConfig({
     },
     user: Users.slug,
   },
-  collections: [Users, Pages, Categories, Media, Subscribers],
+  collections: [Users, Pages, Categories, Media, Subscribers, SupportTickets],
   db: sqliteAdapter({
     client: {
       url: process.env.DATABASE_URL || '',
       authToken: process.env.DATABASE_AUTH_TOKEN || '',
     },
-    push: false,
+    push: true,
     migrationDir: path.resolve(dirname, 'migrations'),
   }),
   editor: lexicalEditor({
@@ -83,7 +86,18 @@ export default buildConfig({
       ]
     },
   }),
-  //email: nodemailerAdapter(),
+  email: nodemailerAdapter({
+    defaultFromAddress: 'support@kindard.com',
+    defaultFromName: 'Kindard Support',
+    transportOptions: {
+      host: process.env.SMTP_HOST || 'smtp.ethereal.email',
+      port: parseInt(process.env.SMTP_PORT || '587'),
+      auth: {
+        user: process.env.SMTP_USER || 'ethereal.user@ethereal.email',
+        pass: process.env.SMTP_PASS || 'etherealpass',
+      },
+    },
+  }),
   endpoints: [],
   globals: [Header, Footer, HomePage],
   plugins,

@@ -1,0 +1,12 @@
+diff --git a/dist/utils/compute-actions/build-promotion-rule-query-filter-from-context.js b/dist/utils/compute-actions/build-promotion-rule-query-filter-from-context.js
+index 680140cb3655ba7af39b9c5d4173f3eaa8a5a1c6..c8f6b5a43734e9a11fa4ebfbc9d9e293b97c6c9f 100644
+--- a/dist/utils/compute-actions/build-promotion-rule-query-filter-from-context.js
++++ b/dist/utils/compute-actions/build-promotion-rule-query-filter-from-context.js
+@@ -13,6 +13,7 @@ const postgresql_1 = require("@mikro-orm/postgresql");
+  * @returns
+  */
+ async function buildPromotionRuleQueryFilterFromContext(context, sharedContext) {
++    return null;
+     const { items = [], shipping_methods: shippingMethods = [], ...restContext } = context;
+     let flattenItemsPropsValuesArray = (0, utils_1.flattenObjectToKeyValuePairs)(items);
+     flattenItemsPropsValuesArray = Object.fromEntries(Object.entries(flattenItemsPropsValuesArray).map(([k, v]) => [

@@ -46,7 +46,7 @@ async function seedPages() {
         continue;
       }
 
-      await payload.create({
+      await (payload.create as any)({
         collection: 'pages',
         req: {
           context: {
@@ -70,9 +70,11 @@ async function seedPages() {
                       children: [
                         {
                           type: 'paragraph',
+                          version: 1,
                           children: [
                             {
                               type: 'text',
+                              version: 1,
                               text: `This is the official ${page.title.toLowerCase()} page for Kindard. The detailed content for this section will be updated shortly.`,
                             }
                           ]

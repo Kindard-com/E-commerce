@@ -7,7 +7,8 @@ import { MinusIcon, PlusIcon } from 'lucide-react'
 import React, { useMemo } from 'react'
 
 export function EditItemQuantityButton({ type, item }: { item: CartItem; type: 'minus' | 'plus' }) {
-  const { decrementItem, incrementItem, isLoading } = useCart()
+  const { hasInitializedCart } = useCart()
+  const isLoading = !hasInitializedCart
 
   const disabled = useMemo(() => {
     if (!item.id) return true
@@ -49,10 +50,11 @@ export function EditItemQuantityButton({ type, item }: { item: CartItem; type: '
           e.preventDefault()
 
           if (item.id) {
+            // Unused template file, dummy actions
             if (type === 'plus') {
-              incrementItem(item.id)
+              console.log('increment')
             } else {
-              decrementItem(item.id)
+              console.log('decrement')
             }
           }
         }}

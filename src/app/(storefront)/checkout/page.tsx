@@ -42,9 +42,9 @@ export default function CheckoutPage() {
           setMedusaCartId(newCart.id);
         }
 
-        const { cart: existingCart } = await medusaClient.store.cart.retrieve(currentCartId);
+        const { cart: existingCart } = await medusaClient.store.cart.retrieve(currentCartId as string);
         for (const item of existingCart.items || []) {
-          await medusaClient.store.cart.deleteLineItem(currentCartId, item.id);
+          await medusaClient.store.cart.deleteLineItem(currentCartId as string, item.id);
         }
 
         for (const localItem of cart) {
@@ -58,14 +58,14 @@ export default function CheckoutPage() {
           }
 
           if (variantId) {
-            await medusaClient.store.cart.createLineItem(currentCartId, {
+            await medusaClient.store.cart.createLineItem(currentCartId as string, {
               variant_id: variantId,
               quantity: localItem.qty
             });
           }
         }
 
-        const { cart: finalCart } = await medusaClient.store.cart.retrieve(currentCartId);
+        const { cart: finalCart } = await medusaClient.store.cart.retrieve(currentCartId as string);
         setSyncedCart(finalCart);
 
       } catch (err: any) {
@@ -348,7 +348,7 @@ export default function CheckoutPage() {
               {(!syncedCart?.items || syncedCart.items.length === 0) && cart.map((item, i) => (
                  <div key={i} style={{ display: 'flex', gap: '16px', marginBottom: '16px' }}>
                   <div style={{ width: '64px', height: '64px', background: '#f5f5f5', border: '1px solid #eee', position: 'relative' }}>
-                    {item.product.images && item.product.images.length > 0 && <img src={item.product.images[0]} alt={item.product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                    {item.product.image && <img src={item.product.image} alt={item.product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
                     <span style={{ position: 'absolute', top: '-8px', right: '-8px', background: 'var(--mid)', color: 'var(--white)', width: '20px', height: '20px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 600 }}>{item.qty}</span>
                   </div>
                   <div style={{ flex: 1 }}>

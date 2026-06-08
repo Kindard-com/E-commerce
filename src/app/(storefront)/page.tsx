@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { medusaServerClient } from '@/storefront/lib/medusa-server';
 import { mapMedusaProduct } from '@/storefront/lib/medusa-mapper';
 import { FaqAccordion } from '@/storefront/components/FaqAccordion';
+import { AutoRefreshFallback } from '@/storefront/components/AutoRefreshFallback';
 import { getPayload } from 'payload';
 import configPromise from '@payload-config';
 
@@ -98,6 +99,7 @@ export default async function Home() {
         <div className="trust-item"><span className="trust-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></span> Secure Checkout Guarantee</div>
       </div>
 
+      <AutoRefreshFallback isFallback={products === fallbackProducts} />
       <FilterBar resultCount={products.length} />
       
       <div className="shop-layout">

@@ -4,9 +4,11 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { useStore } from '../lib/StoreContext';
 import { useRouter } from 'next/navigation';
+import { SizeGuideModal } from './SizeGuideModal';
 
 export function DetailPanel() {
   const { isDetailOpen, setDetailOpen, selectedProduct, addToCart, user } = useStore();
+  const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [wishlisted, setWishlisted] = useState(false);
@@ -73,7 +75,10 @@ export function DetailPanel() {
         )}
       </div>
       <div className="detail-body">
-        <div className="detail-brand">{selectedProduct.brand}</div>
+        <div className="detail-brand" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          {selectedProduct.brand}
+          <a href={`/product/${selectedProduct.medusa_id || selectedProduct.id}`} onClick={() => setDetailOpen(false)} style={{ fontSize: '11px', textDecoration: 'underline', cursor: 'pointer' }}>VIEW FULL DETAILS ↗</a>
+        </div>
         <div className="detail-name">{selectedProduct.name}</div>
         <div className="detail-price">${selectedProduct.price}</div>
         
@@ -91,7 +96,7 @@ export function DetailPanel() {
 
         <div className="detail-section-label">
           <span>SIZE (INTERNATIONAL)</span>
-          <span className="size-guide">SIZE GUIDELINES ↗</span>
+          <span className="size-guide" onClick={() => setSizeGuideOpen(true)} style={{ cursor: 'pointer' }}>SIZE GUIDELINES ↗</span>
         </div>
         <div className="sizes-row">
           {selectedProduct.sizes.map(sz => {
@@ -145,7 +150,16 @@ export function DetailPanel() {
           </svg>
           {wishlisted ? 'SAVED ✓' : wishLoading ? 'SAVING...' : 'SAVE TO WISHLIST'}
         </button>
+
+        <div style={{ marginTop: '32px', borderTop: '1px solid var(--border)', paddingTop: '24px' }}>
+          <div className="detail-section-label"><span>MATERIALS & CARE</span></div>
+          <div style={{ fontSize: '13px', lineHeight: 1.5, color: '#444' }}>
+            <p style={{ marginBottom: '12px' }}><strong>Composition:</strong> 100% Organic Heavyweight Cotton. Safe for sensitive skin and incredibly durable for playground wear.</p>
+            <p><strong>Care Instructions:</strong> Machine wash cold with like colors. Tumble dry low or hang dry to preserve the oversized fit. Do not iron directly on graphics.</p>
+          </div>
+        </div>
       </div>
+      <SizeGuideModal isOpen={sizeGuideOpen} onClose={() => setSizeGuideOpen(false)} />
     </div>
   );
 }

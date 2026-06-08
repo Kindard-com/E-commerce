@@ -77,6 +77,7 @@ export interface Config {
     categories: Category;
     media: Media;
     subscribers: Subscriber;
+    'support-tickets': SupportTicket;
     forms: Form;
     'form-submissions': FormSubmission;
     addresses: Address;
@@ -111,6 +112,7 @@ export interface Config {
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     subscribers: SubscribersSelect<false> | SubscribersSelect<true>;
+    'support-tickets': SupportTicketsSelect<false> | SupportTicketsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
     addresses: AddressesSelect<false> | AddressesSelect<true>;
@@ -490,6 +492,15 @@ export interface Page {
     | ThreeItemGridBlock
     | BannerBlock
     | FormBlock
+    | {
+        heading?: string | null;
+        description?: string | null;
+        successMessage?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'ticketForm';
+      }
+    | HelpCenterBlock
   )[];
   meta?: {
     title?: string | null;
@@ -881,6 +892,24 @@ export interface Form {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HelpCenterBlock".
+ */
+export interface HelpCenterBlock {
+  heroTitle: string;
+  heroSubtitle: string;
+  searchPlaceholder: string;
+  cards: {
+    icon: 'help-circle' | 'smartphone-charging' | 'users' | 'wallet' | 'file-text';
+    title: string;
+    description: string;
+    id?: string | null;
+  }[];
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'helpCenter';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "variants".
  */
 export interface Variant {
@@ -1037,6 +1066,35 @@ export interface Subscriber {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "support-tickets".
+ */
+export interface SupportTicket {
+  id: number;
+  ticketId?: string | null;
+  status?: ('open' | 'in_progress' | 'closed') | null;
+  customerName: string;
+  customerEmail: string;
+  subject: string;
+  message: string;
+  /**
+   * Type your reply here. When you save this ticket, an email will be automatically sent to the customer.
+   */
+  draftReply?: string | null;
+  /**
+   * History of replies sent to this customer.
+   */
+  replyHistory?:
+    | {
+        sentAt?: string | null;
+        message?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "form-submissions".
  */
 export interface FormSubmission {
@@ -1095,6 +1153,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'subscribers';
         value: number | Subscriber;
+      } | null)
+    | ({
+        relationTo: 'support-tickets';
+        value: number | SupportTicket;
       } | null)
     | ({
         relationTo: 'forms';
@@ -1245,6 +1307,16 @@ export interface PagesSelect<T extends boolean = true> {
         threeItemGrid?: T | ThreeItemGridBlockSelect<T>;
         banner?: T | BannerBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
+        ticketForm?:
+          | T
+          | {
+              heading?: T;
+              description?: T;
+              successMessage?: T;
+              id?: T;
+              blockName?: T;
+            };
+        helpCenter?: T | HelpCenterBlockSelect<T>;
       };
   meta?:
     | T
@@ -1379,6 +1451,25 @@ export interface FormBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HelpCenterBlock_select".
+ */
+export interface HelpCenterBlockSelect<T extends boolean = true> {
+  heroTitle?: T;
+  heroSubtitle?: T;
+  searchPlaceholder?: T;
+  cards?:
+    | T
+    | {
+        icon?: T;
+        title?: T;
+        description?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categories_select".
  */
 export interface CategoriesSelect<T extends boolean = true> {
@@ -1414,6 +1505,28 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface SubscribersSelect<T extends boolean = true> {
   email?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "support-tickets_select".
+ */
+export interface SupportTicketsSelect<T extends boolean = true> {
+  ticketId?: T;
+  status?: T;
+  customerName?: T;
+  customerEmail?: T;
+  subject?: T;
+  message?: T;
+  draftReply?: T;
+  replyHistory?:
+    | T
+    | {
+        sentAt?: T;
+        message?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }

@@ -1,0 +1,7 @@
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="24" height="24" rx="6" fill="black" style="fill:black;fill-opacity:1;"/>
+<rect x="0.5" y="0.5" width="23" height="23" rx="5.5" stroke="white" stroke-opacity="0.1" style="stroke:white;stroke-opacity:0.1;"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M9.05844 16.5C11.4853 16.5 13.5 14.4853 13.5 12.0584C13.5 9.51472 11.4853 7.5 9.05844 7.5C6.51472 7.5 4.5 9.51472 4.5 12.0584C4.5 14.4853 6.51472 16.5 9.05844 16.5Z" fill="#E7001A" style="fill:#E7001A;fill:color(display-p3 0.9059 0.0000 0.1020);fill-opacity:1;"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M15.0584 16.5C17.4853 16.5 19.5 14.4853 19.5 12.0584C19.5 9.51472 17.4853 7.5 15.0584 7.5C12.5147 7.5 10.5 9.51472 10.5 12.0584C10.5 14.4853 12.5147 16.5 15.0584 16.5Z" fill="#F49B1C" style="fill:#F49B1C;fill:color(display-p3 0.9569 0.6078 0.1098);fill-opacity:1;"/>
+<path opacity="0.3" fill-rule="evenodd" clip-rule="evenodd" d="M12.009 8.65167C11.0794 9.48239 10.5 10.6944 10.5 12.0584C10.5 13.3599 11.0794 14.5428 12.009 15.36C12.9206 14.5428 13.5 13.3599 13.5 12.0584C13.5 10.6944 12.9206 9.48239 12.009 8.65167Z" fill="#E7001A" style="fill:#E7001A;fill:color(display-p3 0.9059 0.0000 0.1020);fill-opacity:1;"/>
+</svg>
