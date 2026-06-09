@@ -20,6 +20,7 @@ import { Media } from '@/collections/Media'
 import { Pages } from '@/collections/Pages'
 import { Users } from '@/collections/Users'
 import { Subscribers } from '@/collections/Subscribers'
+import { HelpArticles } from '@/collections/HelpArticles'
 import { HomePage } from '@/globals/HomePage'
 import { Footer } from '@/globals/Footer'
 import { Header } from '@/globals/Header'
@@ -32,17 +33,9 @@ import { SupportTickets } from '@/collections/SupportTickets'
 
 export default buildConfig({
   admin: {
-    components: {
-      // The `BeforeLogin` component renders a message that you see while logging into your admin panel.
-      // Feel free to delete this at any time. Simply remove the line below and the import `BeforeLogin` statement on line 15.
-      beforeLogin: ['@/components/BeforeLogin#BeforeLogin'],
-      // The `BeforeDashboard` component renders the 'welcome' block that you see after logging into your admin panel.
-      // Feel free to delete this at any time. Simply remove the line below and the import `BeforeDashboard` statement on line 15.
-      beforeDashboard: ['@/components/BeforeDashboard#BeforeDashboard'],
-    },
     user: Users.slug,
   },
-  collections: [Users, Pages, Categories, Media, Subscribers, SupportTickets],
+  collections: [Users, Pages, Categories, Media, Subscribers, SupportTickets, HelpArticles],
   db: sqliteAdapter({
     client: {
       url: process.env.DATABASE_URL || '',

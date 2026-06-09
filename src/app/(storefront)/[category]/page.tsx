@@ -82,6 +82,16 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
     const page = docs[0];
     
     if (page) {
+      const isHelpContact = page.slug === 'help-contact';
+      
+      if (isHelpContact) {
+        return (
+          <div className="payload-page-wrapper w-full">
+            {page.layout && <RenderBlocks blocks={page.layout} />}
+          </div>
+        );
+      }
+
       return (
         <div className="payload-page-wrapper" style={{ padding: '40px 0', minHeight: '50vh' }}>
           <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>

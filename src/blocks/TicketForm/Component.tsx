@@ -1,22 +1,34 @@
 import React from 'react'
 import { TicketFormClient } from './ClientComponent'
-
-export type TicketFormBlockProps = {
-  heading?: string
-  description?: string
-  successMessage?: string
-}
+import type { TicketFormBlock as TicketFormBlockProps } from '@/payload-types'
 
 export const TicketFormBlock: React.FC<TicketFormBlockProps> = (props) => {
   return (
-    <div className="py-16 md:py-24 max-w-3xl mx-auto px-4 md:px-0">
-      <div className="text-center mb-12">
-        <h2 className="text-3xl md:text-5xl font-bold uppercase tracking-tighter mb-4">{props.heading || 'Submit a Support Ticket'}</h2>
-        {props.description && <p className="text-gray-500 text-lg">{props.description}</p>}
+    <div className="tf-wrapper" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' }}>
+      <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+        <h2 style={{ fontSize: '32px', fontWeight: 700, color: '#1a202c', marginBottom: '12px' }}>
+          {props.heading || 'Submit a Support Ticket'}
+        </h2>
+        {props.description && (
+          <p style={{ fontSize: '18px', color: '#718096' }}>
+            {props.description}
+          </p>
+        )}
       </div>
       
-      <div className="bg-white/5 border border-white/10 rounded-2xl p-6 md:p-10 backdrop-blur-sm">
-        <TicketFormClient successMessage={props.successMessage} />
+      <div className="tf-container">
+        <TicketFormClient 
+          successMessage={props.successMessage}
+          nameLabel={props.nameLabel}
+          namePlaceholder={props.namePlaceholder}
+          emailLabel={props.emailLabel}
+          emailPlaceholder={props.emailPlaceholder}
+          subjectLabel={props.subjectLabel}
+          subjectPlaceholder={props.subjectPlaceholder}
+          messageLabel={props.messageLabel}
+          messagePlaceholder={props.messagePlaceholder}
+          submitButtonText={props.submitButtonText}
+        />
       </div>
     </div>
   )

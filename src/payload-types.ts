@@ -78,6 +78,7 @@ export interface Config {
     media: Media;
     subscribers: Subscriber;
     'support-tickets': SupportTicket;
+    'help-articles': HelpArticle;
     forms: Form;
     'form-submissions': FormSubmission;
     addresses: Address;
@@ -113,6 +114,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     subscribers: SubscribersSelect<false> | SubscribersSelect<true>;
     'support-tickets': SupportTicketsSelect<false> | SupportTicketsSelect<true>;
+    'help-articles': HelpArticlesSelect<false> | HelpArticlesSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
     addresses: AddressesSelect<false> | AddressesSelect<true>;
@@ -495,12 +497,25 @@ export interface Page {
     | {
         heading?: string | null;
         description?: string | null;
+        /**
+         * Label for the Name field
+         */
+        nameLabel?: string | null;
+        namePlaceholder?: string | null;
+        emailLabel?: string | null;
+        emailPlaceholder?: string | null;
+        subjectLabel?: string | null;
+        subjectPlaceholder?: string | null;
+        messageLabel?: string | null;
+        messagePlaceholder?: string | null;
+        submitButtonText?: string | null;
         successMessage?: string | null;
         id?: string | null;
         blockName?: string | null;
         blockType: 'ticketForm';
       }
     | HelpCenterBlock
+    | MarqueeBlock
   )[];
   meta?: {
     title?: string | null;
@@ -898,15 +913,41 @@ export interface HelpCenterBlock {
   heroTitle: string;
   heroSubtitle: string;
   searchPlaceholder: string;
+  /**
+   * Optional background photo for the hero area
+   */
+  heroImage?: (number | null) | Media;
   cards: {
     icon: 'help-circle' | 'smartphone-charging' | 'users' | 'wallet' | 'file-text';
     title: string;
     description: string;
+    /**
+     * Optional link URL for the card
+     */
+    linkUrl?: string | null;
     id?: string | null;
   }[];
   id?: string | null;
   blockName?: string | null;
   blockType: 'helpCenter';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MarqueeBlock".
+ */
+export interface MarqueeBlock {
+  text: string;
+  /**
+   * Hex color code or valid CSS color (e.g. #FFFFFF or white)
+   */
+  backgroundColor: string;
+  /**
+   * Hex color code or valid CSS color (e.g. #000000 or black)
+   */
+  textColor: string;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'marquee';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1095,6 +1136,45 @@ export interface SupportTicket {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "help-articles".
+ */
+export interface HelpArticle {
+  id: number;
+  title: string;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  meta?: {
+    title?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+    description?: string | null;
+  };
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "form-submissions".
  */
 export interface FormSubmission {
@@ -1157,6 +1237,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'support-tickets';
         value: number | SupportTicket;
+      } | null)
+    | ({
+        relationTo: 'help-articles';
+        value: number | HelpArticle;
       } | null)
     | ({
         relationTo: 'forms';
@@ -1312,11 +1396,21 @@ export interface PagesSelect<T extends boolean = true> {
           | {
               heading?: T;
               description?: T;
+              nameLabel?: T;
+              namePlaceholder?: T;
+              emailLabel?: T;
+              emailPlaceholder?: T;
+              subjectLabel?: T;
+              subjectPlaceholder?: T;
+              messageLabel?: T;
+              messagePlaceholder?: T;
+              submitButtonText?: T;
               successMessage?: T;
               id?: T;
               blockName?: T;
             };
         helpCenter?: T | HelpCenterBlockSelect<T>;
+        marquee?: T | MarqueeBlockSelect<T>;
       };
   meta?:
     | T
@@ -1457,14 +1551,27 @@ export interface HelpCenterBlockSelect<T extends boolean = true> {
   heroTitle?: T;
   heroSubtitle?: T;
   searchPlaceholder?: T;
+  heroImage?: T;
   cards?:
     | T
     | {
         icon?: T;
         title?: T;
         description?: T;
+        linkUrl?: T;
         id?: T;
       };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MarqueeBlock_select".
+ */
+export interface MarqueeBlockSelect<T extends boolean = true> {
+  text?: T;
+  backgroundColor?: T;
+  textColor?: T;
   id?: T;
   blockName?: T;
 }
@@ -1529,6 +1636,26 @@ export interface SupportTicketsSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "help-articles_select".
+ */
+export interface HelpArticlesSelect<T extends boolean = true> {
+  title?: T;
+  content?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        image?: T;
+        description?: T;
+      };
+  generateSlug?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
