@@ -1,0 +1,18 @@
+#!/usr/bin/expect -f
+set timeout 300
+spawn npx tsx push-schema.ts
+expect {
+    -re "created or renamed from another table" {
+        send "\r"
+        exp_continue
+    }
+    -re "created or renamed from another column" {
+        send "\r"
+        exp_continue
+    }
+    -re "Accept warnings and push schema to database" {
+        send "y\r"
+        exp_continue
+    }
+    eof
+}

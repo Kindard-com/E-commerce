@@ -138,11 +138,13 @@ export interface Config {
     header: Header;
     footer: Footer;
     'home-page': HomePage;
+    'help-center-page': HelpCenterPage;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
     'home-page': HomePageSelect<false> | HomePageSelect<true>;
+    'help-center-page': HelpCenterPageSelect<false> | HelpCenterPageSelect<true>;
   };
   locale: null;
   widgets: {
@@ -516,6 +518,7 @@ export interface Page {
       }
     | HelpCenterBlock
     | MarqueeBlock
+    | SizeGuideBlock
   )[];
   meta?: {
     title?: string | null;
@@ -948,6 +951,24 @@ export interface MarqueeBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'marquee';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SizeGuideBlock".
+ */
+export interface SizeGuideBlock {
+  headline: string;
+  description?: string | null;
+  cards: {
+    sizeName: string;
+    measurements?: string | null;
+    fitType?: ('tight' | 'regular' | 'oversized') | null;
+    description?: string | null;
+    id?: string | null;
+  }[];
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'sizeGuide';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1411,6 +1432,7 @@ export interface PagesSelect<T extends boolean = true> {
             };
         helpCenter?: T | HelpCenterBlockSelect<T>;
         marquee?: T | MarqueeBlockSelect<T>;
+        sizeGuide?: T | SizeGuideBlockSelect<T>;
       };
   meta?:
     | T
@@ -1572,6 +1594,25 @@ export interface MarqueeBlockSelect<T extends boolean = true> {
   text?: T;
   backgroundColor?: T;
   textColor?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SizeGuideBlock_select".
+ */
+export interface SizeGuideBlockSelect<T extends boolean = true> {
+  headline?: T;
+  description?: T;
+  cards?:
+    | T
+    | {
+        sizeName?: T;
+        measurements?: T;
+        fitType?: T;
+        description?: T;
+        id?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -2152,6 +2193,26 @@ export interface HomePage {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "help-center-page".
+ */
+export interface HelpCenterPage {
+  id: number;
+  title: string;
+  subtitle: string;
+  searchPlaceholder: string;
+  categories?:
+    | {
+        icon: string;
+        title: string;
+        description: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header_select".
  */
 export interface HeaderSelect<T extends boolean = true> {
@@ -2246,6 +2307,26 @@ export interface HomePageSelect<T extends boolean = true> {
         subtitle?: T;
         buttonText?: T;
         buttonUrl?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "help-center-page_select".
+ */
+export interface HelpCenterPageSelect<T extends boolean = true> {
+  title?: T;
+  subtitle?: T;
+  searchPlaceholder?: T;
+  categories?:
+    | T
+    | {
+        icon?: T;
+        title?: T;
+        description?: T;
+        id?: T;
       };
   updatedAt?: T;
   createdAt?: T;

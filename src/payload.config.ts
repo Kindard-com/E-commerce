@@ -24,6 +24,7 @@ import { HelpArticles } from '@/collections/HelpArticles'
 import { HomePage } from '@/globals/HomePage'
 import { Footer } from '@/globals/Footer'
 import { Header } from '@/globals/Header'
+import { HelpCenterPage } from '@/globals/HelpCenterPage'
 import { plugins } from './plugins'
 
 const filename = fileURLToPath(import.meta.url)
@@ -92,7 +93,7 @@ export default buildConfig({
     },
   }),
   endpoints: [],
-  globals: [Header, Footer, HomePage],
+  globals: [Header, Footer, HomePage, HelpCenterPage],
   plugins,
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {

@@ -4,6 +4,8 @@ import { fallbackProducts, Product } from '@/storefront/lib/products';
 import { medusaServerClient } from '@/storefront/lib/medusa-server';
 import { mapMedusaProduct } from '@/storefront/lib/medusa-mapper';
 import crypto from 'crypto';
+import { getPayload } from 'payload';
+import configPromise from '@payload-config';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -11,12 +13,28 @@ export async function GET(request: Request) {
   const authHeader = request.headers.get('authorization');
   
   let allProducts: Product[] = [];
+  let allArticles: any[] = [];
   try {
     const { products: storeProducts } = await medusaServerClient.admin.product.list({ q, limit: 100 });
     allProducts = storeProducts.map(mapMedusaProduct);
     if (allProducts.length === 0 && !q) allProducts = fallbackProducts;
   } catch (err) {
     allProducts = fallbackProducts;
+  }
+
+  try {
+    const payload = await getPayload({ config: configPromise });
+    const articlesRes = await payload.find({
+      collection: 'help-articles',
+      where: {
+        or: [
+          { title: { contains: q } }
+        ]
+      }
+    });
+    allArticles = articlesRes.docs || [];
+  } catch (err) {
+    console.error("Payload search error", err);
   }
 
   // Basic filtering first
@@ -37,7 +55,7 @@ export async function GET(request: Request) {
     } catch(e) {}
 
     results.sort((a, b) => b.score - a.score);
-    return NextResponse.json({ results });
+    return NextResponse.json({ results, articles: allArticles });
   }
 
   // Logged-in scoring
@@ -92,5 +110,5 @@ export async function GET(request: Request) {
   }
 
   results.sort((a, b) => b.score - a.score);
-  return NextResponse.json({ results });
+  return NextResponse.json({ results, articles: allArticles });
 }
