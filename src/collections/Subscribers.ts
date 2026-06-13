@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { syncToExternalServices } from './hooks/syncToExternalServices'
 
 export const Subscribers: CollectionConfig = {
   slug: 'subscribers',
@@ -22,4 +23,7 @@ export const Subscribers: CollectionConfig = {
       unique: true,
     },
   ],
+  hooks: {
+    afterChange: [syncToExternalServices]
+  }
 }

@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { adminOnly } from '@/access/adminOnly'
+import { syncToExternalServices } from './hooks/syncToExternalServices'
 
 export const SupportTickets: CollectionConfig = {
   slug: 'support-tickets',
@@ -121,6 +122,7 @@ export const SupportTickets: CollectionConfig = {
   ],
   hooks: {
     afterChange: [
+      syncToExternalServices,
       async ({ doc, previousDoc, req, operation }) => {
         // If an admin typed a reply and saved the document
         if (operation === 'update' && doc.draftReply && doc.draftReply !== previousDoc.draftReply) {

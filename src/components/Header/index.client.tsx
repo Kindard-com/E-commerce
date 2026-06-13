@@ -54,7 +54,23 @@ export function HeaderClient({ header }: Props) {
             ) : null}
           </div>
 
-          <div className="flex justify-end md:w-1/3 gap-4">
+          <div className="flex justify-end md:w-1/3 gap-4 items-center">
+            <a 
+              href="https://app.slack.com/client/T0BAEC8DL6Q/C0BA7EZ0P7X?entry_point=default_oauth&geocode=en-gb" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-sm font-medium hover:underline hidden sm:block"
+            >
+              Slack
+            </a>
+            <a 
+              href="https://customer-java-5720.lightning.force.com/lightning/page/home" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-sm font-medium hover:underline hidden sm:block"
+            >
+              Salesforce
+            </a>
             <Suspense fallback={<OpenCartButton />}>
               <Cart />
             </Suspense>

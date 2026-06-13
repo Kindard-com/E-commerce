@@ -3,6 +3,8 @@ import { render } from "@react-email/render"
 import React from 'react'
 import KindardOrderConfirmationEmail from "../emails/KindardOrderConfirmationEmail"
 import { sendMail } from "../lib/send-mail"
+import { slackService } from "../lib/slack"
+import { salesforceService } from "../lib/salesforce"
 
 export default async function orderPlacedHandler({
   event: { data },
@@ -99,6 +101,10 @@ export default async function orderPlacedHandler({
       subject: `Your Kindard order confirmation (#${order.display_id || order.id.slice(0, 8)})`,
       html,
     })
+
+    // Sync to external services
+    await slackService.notifyOrder(order)
+    await salesforceService.syncOrder(order)
   } catch (error) {
     console.error(`[Order Subscriber] Error rendering/sending email for order ${data.id}:`, error)
   }
