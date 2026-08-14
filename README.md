@@ -6,9 +6,9 @@ This repository contains the complete e-commerce architecture for Kindard Kids, 
 2. **Payload CMS + Next.js Storefront** — The main storefront and content management system.
 3. **Medusa Backend** — The headless commerce engine managing products, orders, and checkout.
 
-GitHub: [Kindard-com/E-commerce](https://github.com/Kindard-com/E-commerce)
+GitHub: [Kindard-com/E-commerce](https://github.com/Kindard-com/E-commerce) (public)
 
-> **Visibility:** this GitHub repository is currently **private**. Making it public requires an org owner to change visibility in GitHub → Settings → General → Danger zone → Change repository visibility. The GitHub CLI available to this agent is read-only for that setting.
+> **Security:** never commit real credentials. Copy values from `.env.example` into local `.env` files and rotate any secrets that were ever committed to git history.
 
 ---
 
@@ -39,8 +39,9 @@ Captured from a live local run of the Next.js storefront (`:3000`) and Kindard C
 ### SDK tests
 
 ```bash
-npm run test:unit    # Medusa JS SDK namespaces + product mapper
-npm run test:sdk     # live smoke test against a running Medusa backend
+pnpm install --frozen-lockfile
+pnpm run test:unit    # Medusa JS SDK namespaces + product mapper
+pnpm run test:sdk     # live smoke test against a running Medusa backend
 ```
 
 Latest unit result: **3/3 passed** (`docs/proof/sdk-test.json`).
@@ -86,7 +87,7 @@ npm install
 **Environment Variables (`kindard-cloud/.env`):**
 ```env
 PORT=3001
-TURSO_URL=libsql://kindard-cloud-kindard.aws-eu-west-1.turso.io
+TURSO_URL=libsql://your-database.turso.io
 TURSO_AUTH_TOKEN=your_turso_token
 ```
 
@@ -120,7 +121,7 @@ ADMIN_CORS=https://kindard.com,http://localhost:9000
 AUTH_CORS=https://kindard.com,http://localhost:9000
 JWT_SECRET=your_super_secret_jwt
 COOKIE_SECRET=your_super_secret_cookie
-DATABASE_URL=postgresql://neondb_owner:.../neondb?sslmode=require
+DATABASE_URL=postgresql://user:password@host:5432/medusa?sslmode=require
 REDIS_URL=redis://localhost:6379
 ```
 
@@ -147,21 +148,21 @@ This is the Next.js application that contains both the customer-facing storefron
 **Local Setup:**
 ```bash
 # From the root directory
-npm install
+pnpm install --frozen-lockfile
 ```
 
 **Environment Variables (`.env`):**
 ```env
-# Payload CMS
-DATABASE_URI=libsql://kindard-e-commerce-kindard.aws-eu-west-1.turso.io
-DATABASE_AUTH_TOKEN=your_turso_token
-PAYLOAD_SECRET=your_payload_secret
+# Payload CMS (local SQLite by default)
+DATABASE_URL=file:./payload.db
 
 # Medusa Connection
-NEXT_PUBLIC_MEDUSA_BACKEND_URL=https://ad2.kcms.kopscore.com
+NEXT_PUBLIC_MEDUSA_BACKEND_URL=http://127.0.0.1:9000
+NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=pk_from_medusa_api_key_table
+NEXT_PUBLIC_MEDUSA_SALES_CHANNEL_ID=sc_from_sales_channel_table
 
 # CDN Connection
-NEXT_PUBLIC_CDN_URL=https://kindardcloud.com
+CDN_BASE_URL=http://localhost:3001
 ```
 
 **Production Deployment (Vercel / Netlify / Node server):**
@@ -184,13 +185,13 @@ npm run start
 To run all three services simultaneously for local development, run the following command from the root directory:
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 *This starts Payload/storefront (port 3000), CDN (port 3001), and Medusa (port 9000) together.*
 
-Medusa now auto-installs backend dependencies if they are missing (`scripts/run-medusa.sh`), so `medusa: command not found` should no longer stop `npm run dev`.
+Medusa auto-installs backend dependencies and runs migrations when started via `scripts/run-medusa.sh`.
 
 ```bash
-npm run test:unit
-npm run test:sdk
+pnpm run test:unit
+pnpm run test:sdk
 ```

@@ -12,10 +12,15 @@ const client = createClient({
 });
 
 async function run() {
-  const adminName = "Erickson Poel";
-  const email = "admin@example.com";
-  const role = "owner";
-  const adminNumber = "KIND-ADM-000001";
+  const adminName = process.env.ADMIN_NAME || "Local Admin";
+  const email = process.env.ADMIN_EMAIL;
+  const role = process.env.ADMIN_ROLE || "owner";
+  const adminNumber = process.env.ADMIN_NUMBER || "KIND-ADM-000001";
+
+  if (!email) {
+    console.error("Set ADMIN_EMAIL in your environment before running this script.");
+    process.exit(1);
+  }
   
   // Generate random password
   const tempPassword = crypto.randomBytes(12).toString("base64");

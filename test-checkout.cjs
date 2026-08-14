@@ -1,8 +1,19 @@
+require('dotenv').config()
+
 const Medusa = require("@medusajs/js-sdk");
 
+const baseUrl = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || process.env.MEDUSA_URL || "http://127.0.0.1:9000"
+const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
+const salesChannelId = process.env.NEXT_PUBLIC_MEDUSA_SALES_CHANNEL_ID
+
+if (!publishableKey) {
+  console.error("Set NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY before running this script.")
+  process.exit(1)
+}
+
 const medusa = new Medusa.default({
-  baseUrl: "http://127.0.0.1:9001",
-  publishableKey: "pk_example_from_env"
+  baseUrl,
+  publishableKey,
 });
 
 async function test() {
@@ -13,7 +24,7 @@ async function test() {
     console.log("Creating cart...");
     const { cart } = await medusa.store.cart.create({ 
       region_id: region.id,
-      sales_channel_id: "sc_01KSGQVMHPZ1V1VK4KWHPM3CM1",
+      ...(salesChannelId ? { sales_channel_id: salesChannelId } : {}),
       email: "test@example.com",
       currency_code: "eur"
     });
