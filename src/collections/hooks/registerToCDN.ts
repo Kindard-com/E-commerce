@@ -1,16 +1,23 @@
 import type { CollectionAfterChangeHook } from 'payload'
 
 export const registerToCDN: CollectionAfterChangeHook = async ({
-  doc, // full document data
-  req, // full express request
-  operation, // name of the operation ie. 'create', 'update'
+  doc,
+  req,
+  operation,
+  context,
 }) => {
+  if (context?.skipCdnRegister) return doc
+
   if (operation === 'create' || (operation === 'update' && !doc.cdn_hash)) {
     const payloadServerUrl = process.env.PAYLOAD_PUBLIC_SERVER_URL || 'http://localhost:3000'
     const originalUrl = `${payloadServerUrl}${doc.url}`
     
     const cdnUrl = process.env.CDN_BASE_URL || 'http://localhost:3001'
-    const adminKey = process.env.CDN_ADMIN_API_KEY || 'secret_admin_key_123'
+    const adminKey = process.env.CDN_ADMIN_API_KEY
+    if (!adminKey) {
+      console.warn('CDN_ADMIN_API_KEY is not set; skipping CDN registration')
+      return doc
+    }
     
     try {
       const response = await fetch(`${cdnUrl}/api/images/register`, {
@@ -37,6 +44,7 @@ export const registerToCDN: CollectionAfterChangeHook = async ({
             data: {
               cdn_hash: json.hash
             },
+            context: { skipCdnRegister: true },
             req
           })
           

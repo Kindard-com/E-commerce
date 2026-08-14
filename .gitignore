@@ -32,6 +32,19 @@ yarn-error.log*
 .env*
 !.env.example
 
+# sqlite / local databases
+*.db
+*.sqlite
+*.sqlite-journal
+payload.db
+kindard-cloud.db
+
+# secrets
+admin.logs.md
+
+# proof video scratch
+docs/proof/.cache/
+
 # vercel
 .vercel
 

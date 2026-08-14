@@ -5,6 +5,7 @@ loadEnv(process.env.NODE_ENV || 'development', process.cwd())
 module.exports = defineConfig({
   projectConfig: {
     databaseUrl: process.env.DATABASE_URL,
+    redisUrl: process.env.REDIS_URL,
     http: {
       storeCors: process.env.STORE_CORS!,
       adminCors: process.env.ADMIN_CORS!,
@@ -20,21 +21,25 @@ module.exports = defineConfig({
     {
       resolve: "./src/modules/invoices",
     },
-    {
-      resolve: "@medusajs/payment",
-      options: {
-        providers: [
+    ...(process.env.MOLLIE_API_KEY
+      ? [
           {
-            resolve: "@variablevic/mollie-payments-medusa/providers/mollie",
-            id: "mollie",
+            resolve: "@medusajs/payment",
             options: {
-              apiKey: process.env.MOLLIE_API_KEY,
-              redirectUrl: process.env.MOLLIE_REDIRECT_URL,
-              medusaUrl: process.env.MEDUSA_URL,
+              providers: [
+                {
+                  resolve: "@variablevic/mollie-payments-medusa/providers/mollie",
+                  id: "mollie",
+                  options: {
+                    apiKey: process.env.MOLLIE_API_KEY,
+                    redirectUrl: process.env.MOLLIE_REDIRECT_URL,
+                    medusaUrl: process.env.MEDUSA_URL,
+                  },
+                },
+              ],
             },
           },
-        ],
-      },
-    }
-  ]
+        ]
+      : []),
+  ],
 })

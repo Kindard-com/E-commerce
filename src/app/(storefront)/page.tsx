@@ -1,12 +1,11 @@
 import Image from 'next/image';
-import { fallbackProducts, Product } from '@/storefront/lib/products';
+import { Product } from '@/storefront/lib/products';
 import { Metadata } from 'next';
 import { Sidebar } from '@/storefront/components/Sidebar';
 import { ProductGrid } from '@/storefront/components/ProductGrid';
 import { FilterBar } from '@/storefront/components/FilterBar';
 import Link from 'next/link';
-import { medusaServerClient } from '@/storefront/lib/medusa-server';
-import { mapMedusaProduct } from '@/storefront/lib/medusa-mapper';
+import { isFallbackCatalog, loadMedusaProducts } from '@/storefront/lib/load-products';
 import { FaqAccordion } from '@/storefront/components/FaqAccordion';
 import { AutoRefreshFallback } from '@/storefront/components/AutoRefreshFallback';
 import { getPayload } from 'payload';
@@ -20,8 +19,13 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Home() {
-  const payload = await getPayload({ config: configPromise });
-  const homeData = await payload.findGlobal({ slug: 'home-page' }) as any;
+  let homeData: any = null
+  try {
+    const payload = await getPayload({ config: configPromise });
+    homeData = await payload.findGlobal({ slug: 'home-page' });
+  } catch (error) {
+    console.warn('[payload] home-page global unavailable, using defaults', error)
+  }
   
   // Safe defaults if the global hasn't been saved in Payload yet
   const hero = homeData?.hero || {
@@ -51,16 +55,7 @@ export default async function Home() {
     features: []
   };
 
-  let products: Product[] = [];
-  try {
-    const { products: storeProducts } = await medusaServerClient.admin.product.list({ limit: 20 });
-    products = storeProducts.map(mapMedusaProduct);
-    if (products.length === 0) {
-      products = fallbackProducts;
-    }
-  } catch (error) {
-    products = fallbackProducts;
-  }
+  const products: Product[] = await loadMedusaProducts(20);
 
   return (
     <>
@@ -99,7 +94,7 @@ export default async function Home() {
         <div className="trust-item"><span className="trust-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></span> Secure Checkout Guarantee</div>
       </div>
 
-      <AutoRefreshFallback isFallback={products === fallbackProducts} />
+      <AutoRefreshFallback isFallback={isFallbackCatalog(products)} />
       <FilterBar resultCount={products.length} />
       
       <div className="shop-layout">

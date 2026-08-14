@@ -10,7 +10,7 @@ export function ProductClient({ product }: { product: Product }) {
   const { addToCart, user } = useStore();
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
   const [selectedColor, setSelectedColor] = useState<string | null>(product.colors[0] || null);
-  const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [selectedSize, setSelectedSize] = useState<string | null>(product.avail?.[0] || product.sizes[0] || null);
   const [wishlisted, setWishlisted] = useState(false);
   const [wishLoading, setWishLoading] = useState(false);
   const router = useRouter();
@@ -125,7 +125,7 @@ export function ProductClient({ product }: { product: Product }) {
       <div className="social-proof-banner" style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '24px', padding: '16px', background: '#f5f5f5', border: '1px solid var(--border)' }}>
         <div style={{ fontSize: '13px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: 'var(--red)', animation: 'pulse 2s infinite' }}></span>
-          {viewers} people are viewing this right now
+          {viewers} {viewers === 1 ? 'person is' : 'people are'} viewing this right now
         </div>
         <div style={{ fontSize: '13px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span>🔥</span> {sold} sold in the last 24 hours

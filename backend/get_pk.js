@@ -2,7 +2,7 @@ const Medusa = require("@medusajs/js-sdk").default;
 
 const medusa = new Medusa({
   baseUrl: "http://localhost:9000",
-  apiKey: "sk_9d04cecadf57e6cad725c55ca17bfb261ce94fd26fe6588eed3fa3fa1abdca54",
+  apiKey: process.env.MEDUSA_ADMIN_API_KEY || "",
 });
 
 async function run() {

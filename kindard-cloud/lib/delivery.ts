@@ -37,10 +37,18 @@ export async function serveAsset(
   try {
     // 2. Fetch metadata and permissions
     // Note: We're still using the 'images' table for all assets
-    const imageResult = await db.execute({
-      sql: "SELECT id, original_url, mime_type FROM images WHERE hash = ?",
-      args: [hash],
-    });
+    let imageResult
+    try {
+      imageResult = await db.execute({
+        sql: "SELECT id, original_url, mime_type, is_public FROM images WHERE hash = ?",
+        args: [hash],
+      });
+    } catch {
+      imageResult = await db.execute({
+        sql: "SELECT id, original_url, mime_type FROM images WHERE hash = ?",
+        args: [hash],
+      });
+    }
 
     if (imageResult.rows.length === 0) {
       return logAndReturn(hash, requestingDomain, ip, 404, "Asset not found");
@@ -50,9 +58,10 @@ export async function serveAsset(
     const imageId = image.id as string;
     const originalUrl = image.original_url as string;
     const mimeType = image.mime_type as string | null;
+    const isPublic = image.is_public === 1 || image.is_public === true || image.is_public === "1";
 
-    // 3. Verify Domain Permissions (Skip in development for easy testing)
-    if (process.env.NODE_ENV !== "development" || (requestingDomain !== "localhost" && requestingDomain !== "")) {
+    // 3. Verify Domain Permissions (Skip for public assets and local development)
+    if (!isPublic && (process.env.NODE_ENV !== "development" || (requestingDomain !== "localhost" && requestingDomain !== ""))) {
       const permissionResult = await db.execute({
         sql: `
           SELECT 1 FROM domain_image_permissions dip
@@ -122,8 +131,8 @@ async function logAndReturn(hash: string, domain: string, ip: string, statusCode
 
 function logAccess(hash: string, domain: string, ip: string, statusCode: number, reason: string = "") {
   db.execute({
-    sql: "INSERT INTO access_logs (id, image_hash, domain, ip, status_code, reason) VALUES (?, ?, ?, ?, ?, ?)",
-    args: [generateUUID(), hash, domain, ip, statusCode, reason],
+    sql: "INSERT INTO access_logs (id, image_hash, requesting_domain, ip_address, status_code) VALUES (?, ?, ?, ?, ?)",
+    args: [generateUUID(), hash, domain, ip, statusCode],
   }).catch(err => {
     console.error("Failed to write access log:", err);
   });

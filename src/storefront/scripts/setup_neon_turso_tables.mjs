@@ -1,5 +1,5 @@
 import { neon } from "@neondatabase/serverless";
-const sql = neon("postgresql://neondb_owner:npg_0YmB1whTfKVS@ep-square-smoke-ab2qlk9c-pooler.eu-west-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require");
+const sql = neon(process.env.NEON_DATABASE_URL);
 
 async function run() {
   try {

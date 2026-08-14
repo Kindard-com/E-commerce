@@ -1,5 +1,8 @@
-import { neon } from "@neondatabase/serverless";
+import { neon, type NeonQueryFunction } from "@neondatabase/serverless";
 
-// Neon database for all data (Products, Users, Admin, etc.)
-export const neonDb = neon(process.env.NEON_DATABASE_URL || "postgresql://neondb_owner:npg_0YmB1whTfKVS@ep-square-smoke-ab2qlk9c-pooler.eu-west-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require");
+const neonUrl = process.env.NEON_DATABASE_URL;
+const missingNeon = (async () => []) as NeonQueryFunction<false, false>;
 
+export const neonDb: NeonQueryFunction<false, false> = neonUrl
+  ? neon(neonUrl)
+  : (Object.assign(missingNeon, { unsafe: async () => [] }) as NeonQueryFunction<false, false>);

@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import { neonDb } from '@/storefront/lib/db';
 import { fallbackProducts, Product } from '@/storefront/lib/products';
-import { medusaServerClient } from '@/storefront/lib/medusa-server';
-import { mapMedusaProduct } from '@/storefront/lib/medusa-mapper';
+import { loadMedusaProducts } from '@/storefront/lib/load-products';
 import crypto from 'crypto';
 import { getPayload } from 'payload';
 import configPromise from '@payload-config';
@@ -12,15 +11,9 @@ export async function GET(request: Request) {
   const q = searchParams.get('q')?.toLowerCase() || '';
   const authHeader = request.headers.get('authorization');
   
-  let allProducts: Product[] = [];
+  let allProducts: Product[] = await loadMedusaProducts(100, q || undefined);
+  if (allProducts.length === 0 && !q) allProducts = fallbackProducts;
   let allArticles: any[] = [];
-  try {
-    const { products: storeProducts } = await medusaServerClient.admin.product.list({ q, limit: 100 });
-    allProducts = storeProducts.map(mapMedusaProduct);
-    if (allProducts.length === 0 && !q) allProducts = fallbackProducts;
-  } catch (err) {
-    allProducts = fallbackProducts;
-  }
 
   try {
     const payload = await getPayload({ config: configPromise });

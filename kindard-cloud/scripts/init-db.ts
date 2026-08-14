@@ -19,10 +19,7 @@ if (fs.existsSync(envPath)) {
   });
 }
 
-if (!process.env.TURSO_DATABASE_URL) {
-  console.error("TURSO_DATABASE_URL is not set.");
-  process.exit(1);
-}
+process.env.TURSO_DATABASE_URL = process.env.TURSO_DATABASE_URL || "file:./kindard-cloud.db";
 
 const db = createClient({
   url: process.env.TURSO_DATABASE_URL,
@@ -39,6 +36,7 @@ async function init() {
       original_url TEXT NOT NULL,
       mime_type TEXT,
       size_bytes INTEGER,
+      is_public BOOLEAN DEFAULT 1,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
   `);

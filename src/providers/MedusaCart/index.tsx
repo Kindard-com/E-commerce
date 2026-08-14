@@ -3,9 +3,12 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import Medusa from '@medusajs/js-sdk'
 
-// Initialize Medusa client
 export const medusaClient = new Medusa({
-  baseUrl: process.env.NEXT_PUBLIC_MEDUSA_URL || 'http://127.0.0.1:9000',
+  baseUrl:
+    process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL ||
+    process.env.NEXT_PUBLIC_MEDUSA_URL ||
+    'http://127.0.0.1:9000',
+  publishableKey: process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY,
   maxRetries: 3,
 })
 
@@ -30,29 +33,7 @@ export const MedusaCartProvider = ({ children }: { children: ReactNode }) => {
   const [cart, setPayloadCart] = useState<PayloadCart | null>(null)
   const [hasInitializedCart, setHasInitializedCart] = useState(false)
 
-  // Fetch or create a cart on load
   useEffect(() => {
-    const initializeCart = async () => {
-      try {
-        const cartId = localStorage.getItem('cart_id')
-        if (cartId) {
-          const { cart } = await medusaClient.store.cart.retrieve(cartId)
-          setMedusaCart(cart)
-        } else {
-          const { cart } = await medusaClient.store.cart.create({
-            region_id: 'reg_something', // We need a valid region to create a cart! We'll fetch one first.
-          })
-          localStorage.setItem('cart_id', cart.id)
-          setMedusaCart(cart)
-        }
-      } catch (error) {
-        console.error('Error initializing Medusa cart:', error)
-      } finally {
-        setHasInitializedCart(true)
-      }
-    }
-
-    // Since Medusa v2 requires a region_id, let's fetch regions first
     const setupCart = async () => {
       try {
         const { regions } = await medusaClient.store.region.list()

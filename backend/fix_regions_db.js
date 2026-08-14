@@ -3,7 +3,7 @@ const crypto = require('crypto');
 
 async function fix() {
   const client = new Client({
-    connectionString: "postgresql://neondb_owner:npg_0YmB1whTfKVS@ep-square-smoke-ab2qlk9c-pooler.eu-west-2.aws.neon.tech/neondb?sslmode=require&uselibpqcompat=true"
+    connectionString: process.env.DATABASE_URL
   });
   
   try {

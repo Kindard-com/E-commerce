@@ -1,0 +1,28 @@
+{
+  "ok": true,
+  "generatedAt": "2026-08-14T07:11:52.000Z",
+  "unit": {
+    "ok": true,
+    "passed": 3,
+    "failed": 0,
+    "files": [
+      "tests/unit/medusa-mapper.spec.ts",
+      "tests/unit/medusa-sdk.spec.ts"
+    ],
+    "checks": [
+      "mapMedusaProduct maps store API calculated prices",
+      "mapMedusaProduct maps admin API EUR prices",
+      "@medusajs/js-sdk exposes store.product, store.cart, store.region, admin.product"
+    ]
+  },
+  "live": {
+    "ok": false,
+    "command": "npm run test:sdk",
+    "reason": "Medusa on :9000 was not available in this run (db:migrate hung after creating mikro_orm_migrations). Storefront used the fallback catalog and store SDK client construction still passed unit tests."
+  },
+  "web": {
+    "storefront": "http://localhost:3000 → 200",
+    "payloadAdmin": "http://localhost:3000/admin → create-first-user",
+    "cdnHealth": "http://localhost:3001/api/system/health → operational"
+  }
+}

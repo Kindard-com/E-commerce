@@ -1,6 +1,5 @@
-import { medusaServerClient } from '@/storefront/lib/medusa-server';
-import { mapMedusaProduct } from '@/storefront/lib/medusa-mapper';
-import { fallbackProducts, Product } from '@/storefront/lib/products';
+import { loadMedusaProductById, loadMedusaProducts } from '@/storefront/lib/load-products';
+import { Product } from '@/storefront/lib/products';
 import { ProductClient } from '@/storefront/components/ProductClient';
 import { ProductGrid } from '@/storefront/components/ProductGrid';
 import Image from 'next/image';
@@ -21,32 +20,16 @@ export async function generateMetadata(props: { params: Promise<{ id: string }> 
 }
 
 async function getProduct(rawId: string): Promise<Product | null> {
-  if (!rawId) return null;
-  const id = decodeURIComponent(rawId).split(' ')[0].trim();
-  const fb = fallbackProducts.find((p) => String(p.id) === String(id));
-  if (fb) return fb;
-
-  try {
-    const { product: medusaProduct } = await medusaServerClient.admin.product.retrieve(id);
-    return mapMedusaProduct(medusaProduct);
-  } catch (error: any) {
-    // Suppress console.error to avoid Next.js dev server error overlays for 404s
-    return null;
-  }
+  return loadMedusaProductById(rawId);
 }
 
 async function getRelatedProducts(product: Product): Promise<Product[]> {
-  let allProducts: Product[] = [];
-  try {
-    const { products: storeProducts } = await medusaServerClient.admin.product.list({ limit: 50 });
-    allProducts = storeProducts.map(mapMedusaProduct);
-    if (allProducts.length === 0) allProducts = fallbackProducts;
-  } catch (err) {
-    allProducts = fallbackProducts;
-  }
-
-  // Filter out the current product
-  allProducts = allProducts.filter(p => String(p.id) !== String(product.id) && String(p.medusa_id) !== String(product.id) && String(p.medusa_id) !== String(product.medusa_id));
+  const allProducts: Product[] = (await loadMedusaProducts(50)).filter(
+    (p) =>
+      String(p.id) !== String(product.id) &&
+      String(p.medusa_id) !== String(product.id) &&
+      String(p.medusa_id) !== String(product.medusa_id),
+  );
 
   const tops = ['tees', 't-shirts', 'shirts', 'hoodies', 'jackets', 'sweaters', 'knits', 'tops'];
   const bottoms = ['shorts', 'pants', 'jeans', 'trousers', 'bottoms'];

@@ -6,6 +6,49 @@ This repository contains the complete e-commerce architecture for Kindard Kids, 
 2. **Payload CMS + Next.js Storefront** — The main storefront and content management system.
 3. **Medusa Backend** — The headless commerce engine managing products, orders, and checkout.
 
+GitHub: [Kindard-com/E-commerce](https://github.com/Kindard-com/E-commerce)
+
+> **Visibility:** this GitHub repository is currently **private**. Making it public requires an org owner to change visibility in GitHub → Settings → General → Danger zone → Change repository visibility. The GitHub CLI available to this agent is read-only for that setting.
+
+---
+
+## Proof (web app + SDK)
+
+Captured from a live local run of the Next.js storefront (`:3000`) and Kindard Cloud CDN (`:3001`).
+
+### Storefront
+
+![Kindard homepage](docs/proof/storefront-home.png)
+
+![New arrivals](docs/proof/storefront-new-arrivals.png)
+
+![Product page](docs/proof/storefront-product.png)
+
+### Payload admin + CDN
+
+![Payload create first user](docs/proof/payload-admin.png)
+
+![CDN health operational](docs/proof/cdn-health.png)
+
+### Demo video
+
+[Watch the storefront demo](docs/proof/kindard-storefront-demo.mp4)
+
+<video src="docs/proof/kindard-storefront-demo.mp4" controls width="800"></video>
+
+### SDK tests
+
+```bash
+npm run test:unit    # Medusa JS SDK namespaces + product mapper
+npm run test:sdk     # live smoke test against a running Medusa backend
+```
+
+Latest unit result: **3/3 passed** (`docs/proof/sdk-test.json`).
+
+The storefront loads products through `@medusajs/js-sdk` (`store.product.list` first, admin API fallback, then the local catalog).
+
+---
+
 ---
 
 ## 🌍 Domain Architecture
@@ -143,4 +186,11 @@ To run all three services simultaneously for local development, run the followin
 ```bash
 npm run dev
 ```
-*This utilizes concurrently to start Payload (port 3000), CDN (port 3001), and Medusa (port 9000) at the same time.*
+*This starts Payload/storefront (port 3000), CDN (port 3001), and Medusa (port 9000) together.*
+
+Medusa now auto-installs backend dependencies if they are missing (`scripts/run-medusa.sh`), so `medusa: command not found` should no longer stop `npm run dev`.
+
+```bash
+npm run test:unit
+npm run test:sdk
+```

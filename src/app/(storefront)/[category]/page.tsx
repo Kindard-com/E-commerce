@@ -1,10 +1,9 @@
 import { neonDb } from '@/storefront/lib/db';
-import { fallbackProducts, Product } from '@/storefront/lib/products';
+import { Product } from '@/storefront/lib/products';
 import { Sidebar } from '@/storefront/components/Sidebar';
 import { ProductGrid } from '@/storefront/components/ProductGrid';
 import { FilterBar } from '@/storefront/components/FilterBar';
-import { medusaServerClient } from '@/storefront/lib/medusa-server';
-import { mapMedusaProduct } from '@/storefront/lib/medusa-mapper';
+import { loadMedusaProducts } from '@/storefront/lib/load-products';
 import { getPayload } from 'payload';
 import configPromise from '@payload-config';
 import { RenderBlocks } from '@/blocks/RenderBlocks';
@@ -134,14 +133,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
   }
 
   // Render Shop Layout
-  let allProducts: Product[] = [];
-  try {
-    const { products: storeProducts } = await medusaServerClient.admin.product.list({ limit: 100 });
-    allProducts = storeProducts.map(mapMedusaProduct);
-    if (allProducts.length === 0) allProducts = fallbackProducts;
-  } catch (err) {
-    allProducts = fallbackProducts;
-  }
+  const allProducts: Product[] = await loadMedusaProducts(100);
 
   let filteredProducts = allProducts;
   
