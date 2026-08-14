@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useStore } from '../lib/StoreContext';
 import { useRouter } from 'next/navigation';
 import { SizeGuideModal } from './SizeGuideModal';
+import { findVariantId } from '../lib/variants';
 
 export function DetailPanel() {
   const { isDetailOpen, setDetailOpen, selectedProduct, addToCart, user } = useStore();
@@ -29,6 +30,7 @@ export function DetailPanel() {
         qty: 1,
         color: selectedColor,
         size: selectedSize,
+        variantId: findVariantId(selectedProduct, selectedSize, selectedColor) || undefined,
       });
       setDetailOpen(false);
     }

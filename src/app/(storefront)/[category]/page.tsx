@@ -138,9 +138,10 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
   let filteredProducts = allProducts;
   
   if (category !== 'new-arrivals' && category !== 'sale') {
-    filteredProducts = allProducts.filter(p => p.category === category);
+    filteredProducts = allProducts.filter(p => p.category === category || p.category?.includes(category));
   } else if (category === 'new-arrivals') {
     filteredProducts = allProducts.filter(p => p.isNew);
+    if (filteredProducts.length === 0) filteredProducts = allProducts;
   } else if (category === 'sale') {
     filteredProducts = allProducts.filter(p => p.discount);
   }

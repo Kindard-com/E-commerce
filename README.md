@@ -46,7 +46,31 @@ pnpm run test:sdk     # live smoke test against a running Medusa backend
 
 Latest unit result: **3/3 passed** (`docs/proof/sdk-test.json`).
 
-The storefront loads products through `@medusajs/js-sdk` (`store.product.list` first, admin API fallback, then the local catalog).
+The storefront loads **live Medusa products** through `@medusajs/js-sdk`. The bag, checkout, and customer portal talk to the same backend. Fake catalog items are no longer sold.
+
+---
+
+## Start selling (local)
+
+1. Copy `.env.example` → `.env` and `backend/.env.example` → `backend/.env`.
+2. Start Postgres + Redis, then:
+
+```bash
+pnpm install --frozen-lockfile
+pnpm --dir backend install
+pnpm run seed:commerce
+```
+
+3. Copy the printed `NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY` and `NEXT_PUBLIC_MEDUSA_SALES_CHANNEL_ID` into `.env`.
+4. Run the three services:
+
+```bash
+pnpm run dev
+```
+
+5. Shop at `http://localhost:3000`, manage products/orders at `http://localhost:9000/app`.
+
+For live Mollie payments set `MOLLIE_API_KEY` in `backend/.env` (redirect URL is `/checkout/complete`). Without it, checkout still creates **real Medusa orders** via the system payment provider so you can operate locally.
 
 ---
 

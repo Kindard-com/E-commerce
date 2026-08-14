@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { neonDb } from '@/storefront/lib/db';
-import { fallbackProducts, Product } from '@/storefront/lib/products';
+import { Product } from '@/storefront/lib/products';
 import { loadMedusaProducts } from '@/storefront/lib/load-products';
 import crypto from 'crypto';
 import { getPayload } from 'payload';
@@ -13,7 +13,6 @@ export async function GET(request: Request) {
   
   const { products: loadedProducts } = await loadMedusaProducts(100, q || undefined);
   let allProducts: Product[] = loadedProducts;
-  if (allProducts.length === 0 && !q) allProducts = fallbackProducts;
   let allArticles: any[] = [];
 
   try {

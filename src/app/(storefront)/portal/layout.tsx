@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 import Link from 'next/link';
 
 export default function PortalLayout({ children }: { children: React.ReactNode }) {
-  const { user, authLoading, isAdmin } = useStore();
+  const { user, authLoading, isAdmin, logout } = useStore();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -59,11 +59,8 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
 
           <button 
             onClick={async () => {
-              if (user) await import('@/storefront/lib/firebase').then(({ auth }) => auth.signOut());
-              if (isAdmin) {
-                await fetch('/api/admin/logout', { method: 'POST' });
-                window.location.href = '/';
-              }
+              await logout()
+              window.location.href = '/'
             }} 
             style={{ textAlign: 'left', marginTop: '24px', background: 'none', border: 'none', color: 'var(--red)', cursor: 'pointer', padding: 0 }}
           >

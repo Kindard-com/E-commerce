@@ -51,7 +51,7 @@ export function GlobalAddressAutocomplete({ defaultValues, onChange, onSubmit, s
   const [city, setCity] = useState(defaultValues?.city || '');
   const [province, setProvince] = useState(defaultValues?.province || '');
   const [postalCode, setPostalCode] = useState(defaultValues?.postal_code || '');
-  const [countryCode, setCountryCode] = useState(defaultValues?.country_code || 'nl');
+  const [countryCode, setCountryCode] = useState(defaultValues?.country_code || 'de');
   const [phone, setPhone] = useState(defaultValues?.phone || '');
   const [metadata, setMetadata] = useState<any>(defaultValues?.metadata || {});
 

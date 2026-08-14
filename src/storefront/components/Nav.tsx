@@ -4,12 +4,10 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useStore } from '../lib/StoreContext';
-import { auth } from '../lib/firebase';
-import { signOut } from 'firebase/auth';
 
 export function Nav() {
   const pathname = usePathname();
-  const { cart, setMenuOpen, setCartOpen, user, customerNumber, isAdmin } = useStore();
+  const { cart, setMenuOpen, setCartOpen, user, isAdmin, logout } = useStore();
   const cartCount = cart.reduce((acc, item) => acc + item.qty, 0);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -18,12 +16,8 @@ export function Nav() {
   };
 
   const handleLogout = async () => {
-    if (user) await signOut(auth);
-    if (isAdmin) {
-      await fetch('/api/admin/logout', { method: 'POST' });
-      window.location.reload();
-    }
-    setDropdownOpen(false);
+    await logout();
+    window.location.href = '/';
   };
 
   const userName = user?.displayName?.split(' ')[0] || 'My Account';

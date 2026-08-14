@@ -17,7 +17,7 @@ function SearchResults() {
       setLoading(true);
       const headers: Record<string, string> = {};
       if (user) {
-        headers['Authorization'] = `Bearer ${user.uid}`;
+        headers['Authorization'] = `Bearer ${user.id}`;
       }
 
       try {
@@ -72,9 +72,11 @@ function SearchResults() {
       ) : (
         <div className="product-grid" style={{ borderTop: '1.5px solid var(--black)', borderLeft: '1.5px solid var(--black)' }}>
           {results.map((product) => (
-            <Link href={`/${product.category}`} key={product.id} className="product-card" style={{ textDecoration: 'none', color: 'inherit' }}>
-              <div className="product-img">
-                <img src={`/img/${product.id}.svg`} alt={product.name} style={{ width: '80%', height: '80%', objectFit: 'contain' }} onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+            <Link href={`/product/${product.medusa_id || product.id}`} key={product.id} className="product-card" style={{ textDecoration: 'none', color: 'inherit' }}>
+              <div className="product-img" style={{ position: 'relative' }}>
+                {product.image ? (
+                  <img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : null}
               </div>
               <div className="product-info">
                 <div className="product-brand">{product.brand || 'KINDARD'}</div>

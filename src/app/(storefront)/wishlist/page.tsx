@@ -2,13 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import { useStore } from '@/storefront/lib/StoreContext';
-import { fallbackProducts } from '@/storefront/lib/products';
+import { medusaClient } from '@/storefront/lib/medusa';
+import { mapMedusaProduct } from '@/storefront/lib/medusa-mapper';
 import Image from 'next/image';
 import Link from 'next/link';
 
 export default function WishlistPage() {
   const { user } = useStore();
   const [wishlist, setWishlist] = useState<any[]>([]);
+  const [productsById, setProductsById] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -25,6 +27,16 @@ export default function WishlistPage() {
         const data = await res.json();
         console.log('[Wishlist] API response:', data);
         setWishlist(data.wishlist || []);
+        const ids = Array.from(new Set((data.wishlist || []).map((item: any) => String(item.product_id))))
+        const entries = await Promise.all(ids.map(async (id) => {
+          try {
+            const { product } = await medusaClient.store.product.retrieve(String(id))
+            return [String(id), mapMedusaProduct(product)] as const
+          } catch {
+            return [String(id), null] as const
+          }
+        }))
+        setProductsById(Object.fromEntries(entries.filter(([, product]) => product)))
       } catch (err) {
         console.error('[Wishlist] Fetch error:', err);
       } finally {
@@ -81,12 +93,12 @@ export default function WishlistPage() {
         <div className="product-grid" style={{ borderTop: '1.5px solid var(--black)', borderLeft: '1.5px solid var(--black)' }}>
           {wishlist.map((item) => {
             // Fix: compare as strings since DB returns product_id as string
-            const product = fallbackProducts.find(p => String(p.id) === String(item.product_id));
+            const product = productsById[String(item.product_id)];
 
             return (
               <div key={item.id} className="product-card" style={{ position: 'relative' }}>
                 {product ? (
-                  <Link href={`/${product.category}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                  <Link href={`/product/${product.medusa_id || product.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                     <div className={`product-img ${product.dark ? 'dark' : ''}`} style={{ position: 'relative' }}>
                       {product.image ? (
                         <Image

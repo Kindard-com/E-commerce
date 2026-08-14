@@ -1,19 +1,42 @@
 import { Product } from './products';
 
-// We use `any` here to avoid strict Medusa types mismatch during rapid dev,
-// but ideally this is typed with StoreProduct from @medusajs/types.
+const CATEGORY_ALIASES: Record<string, string> = {
+  shirts: 'tees',
+  shirt: 'tees',
+  't-shirts': 'tees',
+  't-shirt': 'tees',
+  tees: 'tees',
+  sweatshirts: 'hoodies',
+  sweatshirt: 'hoodies',
+  hoodies: 'hoodies',
+  hoodie: 'hoodies',
+  pants: 'shorts',
+  shorts: 'shorts',
+  knits: 'knits',
+  knit: 'knits',
+  sweaters: 'knits',
+  jackets: 'jackets',
+  jacket: 'jackets',
+  merch: 'accessories',
+  accessories: 'accessories',
+  accessory: 'accessories',
+  hats: 'accessories',
+}
+
+export function normalizeCategory(handle?: string | null): string {
+  if (!handle) return 'uncategorized'
+  return CATEGORY_ALIASES[handle.toLowerCase()] || handle.toLowerCase()
+}
+
 export function mapMedusaProduct(storeProduct: any): Product {
-  // Find prices from variants
   let minPrice = 0;
   let originalPrice = null;
   let discount = null;
 
   if (storeProduct.variants && storeProduct.variants.length > 0) {
-    // Support both Store API (calculated_price) and Admin API (prices array)
     const prices = storeProduct.variants.map((v: any) => {
-      if (v.calculated_price?.calculated_amount) return v.calculated_price.calculated_amount;
+      if (v.calculated_price?.calculated_amount != null) return v.calculated_price.calculated_amount;
       if (v.prices && v.prices.length > 0) {
-         // Try to find EUR first, otherwise fallback to first price
          const eurPrice = v.prices.find((p: any) => p.currency_code === 'eur');
          return eurPrice ? eurPrice.amount : v.prices[0].amount;
       }
@@ -22,8 +45,7 @@ export function mapMedusaProduct(storeProduct: any): Product {
     minPrice = Math.min(...prices);
 
     const origPrices = storeProduct.variants.map((v: any) => {
-      if (v.calculated_price?.original_amount) return v.calculated_price.original_amount;
-      // Admin API doesn't distinguish orig amount easily without price lists, so just use base
+      if (v.calculated_price?.original_amount != null) return v.calculated_price.original_amount;
       if (v.prices && v.prices.length > 0) {
          const eurPrice = v.prices.find((p: any) => p.currency_code === 'eur');
          return eurPrice ? eurPrice.amount : v.prices[0].amount;
@@ -37,7 +59,6 @@ export function mapMedusaProduct(storeProduct: any): Product {
     }
   }
 
-  // Find unique colors and sizes from options
   const colors = new Set<string>();
   const sizes = new Set<string>();
   const avail = new Set<string>();
@@ -52,20 +73,23 @@ export function mapMedusaProduct(storeProduct: any): Product {
     sizeOption.values.forEach((v: any) => sizes.add(v.value));
   }
 
-  // Check variant availability
   storeProduct.variants?.forEach((v: any) => {
-    // In a real app we'd check v.inventory_quantity
-    // For now we assume all variants returned are available unless managed otherwise
-    if (v.manage_inventory === false || v.inventory_quantity > 0 || v.allow_backorder) {
-      const szOpt = v.options?.find((o: any) => o.option_id === sizeOption?.id || o.title?.toLowerCase() === 'size');
-      if (szOpt) avail.add(szOpt.value);
-    }
+    const inStock =
+      v.manage_inventory === false ||
+      v.allow_backorder ||
+      v.inventory_quantity == null ||
+      v.inventory_quantity > 0
+    if (!inStock) return
+    const szOpt = v.options?.find((o: any) => o.option_id === sizeOption?.id || o.title?.toLowerCase() === 'size');
+    if (szOpt) avail.add(szOpt.value);
   });
 
-  // Default colors/sizes if none exist, so the UI doesn't break
   const finalColors = colors.size > 0 ? Array.from(colors) : ['#000000'];
   const finalSizes = sizes.size > 0 ? Array.from(sizes) : ['One Size'];
   const finalAvail = avail.size > 0 ? Array.from(avail) : finalSizes;
+
+  const createdAt = storeProduct.created_at ? new Date(storeProduct.created_at).getTime() : Date.now()
+  const ninetyDays = 90 * 24 * 60 * 60 * 1000
 
   return {
     id: storeProduct.id,
@@ -76,13 +100,13 @@ export function mapMedusaProduct(storeProduct: any): Product {
     price: minPrice,
     orig: originalPrice,
     discount: discount,
-    image: storeProduct.thumbnail || undefined,
-    dark: false, // Could be determined via a custom attribute if needed
+    image: storeProduct.thumbnail || storeProduct.images?.[0]?.url || undefined,
+    dark: false,
     colors: finalColors,
     sizes: finalSizes,
     avail: finalAvail,
-    rating: 5.0, // Hardcoded for now
-    isNew: true, // Could derive from created_at
-    category: storeProduct.categories?.[0]?.handle || 'uncategorized',
+    rating: 5.0,
+    isNew: Date.now() - createdAt < ninetyDays,
+    category: normalizeCategory(storeProduct.categories?.[0]?.handle || storeProduct.categories?.[0]?.name),
   };
 }

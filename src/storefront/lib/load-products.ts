@@ -33,11 +33,9 @@ export async function loadMedusaProducts(limit = 20, query?: string): Promise<Pr
 
   try {
     const { products } = await medusaClient.store.product.list(listArgs)
-    if (products?.length) {
-      return {
-        products: products.map(mapMedusaProduct),
-        source: 'medusa-store',
-      }
+    return {
+      products: (products || []).map(mapMedusaProduct),
+      source: 'medusa-store',
     }
   } catch (error) {
     console.warn('[medusa] store product list failed, trying admin API', error)
@@ -45,18 +43,16 @@ export async function loadMedusaProducts(limit = 20, query?: string): Promise<Pr
 
   try {
     const { products } = await medusaServerClient.admin.product.list(listArgs)
-    if (products?.length) {
-      return {
-        products: products.map(mapMedusaProduct),
-        source: 'medusa-admin',
-      }
+    return {
+      products: (products || []).map(mapMedusaProduct),
+      source: 'medusa-admin',
     }
   } catch (error) {
-    console.warn('[medusa] admin product list failed, using fallback catalog', error)
+    console.warn('[medusa] admin product list failed', error)
   }
 
   return {
-    products: fallbackProducts,
+    products: [],
     source: 'fallback',
   }
 }
@@ -64,10 +60,6 @@ export async function loadMedusaProducts(limit = 20, query?: string): Promise<Pr
 export async function loadMedusaProductById(rawId: string): Promise<Product | null> {
   if (!rawId) return null
   const id = decodeURIComponent(rawId).split(' ')[0].trim()
-
-  const fallback = fallbackProducts.find((product) => String(product.id) === String(id))
-  if (fallback) return fallback
-
   const regionId = await getDefaultRegionId()
 
   try {
@@ -86,10 +78,10 @@ export async function loadMedusaProductById(rawId: string): Promise<Product | nu
     })
     if (product) return mapMedusaProduct(product)
   } catch {
-    return null
+    // Fall through to local catalog only for the original demo ids.
   }
 
-  return null
+  return fallbackProducts.find((product) => String(product.id) === String(id)) || null
 }
 
 export function isMedusaUnavailable(source: ProductCatalogSource): boolean {

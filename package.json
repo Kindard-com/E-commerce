@@ -11,6 +11,7 @@
     "dev:medusa": "bash scripts/run-medusa.sh",
     "test:sdk": "tsx scripts/test-sdk.ts",
     "test:unit": "vitest run --config ./vitest.config.mts tests/unit",
+    "seed:commerce": "pnpm --dir backend run seed:demo",
     "dev": "concurrently -n \"PAYLOAD,CDN,MEDUSA,CRON\" -c \"bgBlue.bold,bgGreen.bold,bgMagenta.bold,bgCyan.bold\" \"npm run dev:payload\" \"npm run dev:cdn\" \"npm run dev:medusa\" \"npm run backup:cron\"",
     "dev:prod": "cross-env NODE_OPTIONS=--no-deprecation rm -rf .next && pnpm build && pnpm start",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",

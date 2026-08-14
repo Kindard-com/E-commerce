@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useStore } from '../lib/StoreContext';
 import { useRouter } from 'next/navigation';
+import { findVariantId } from '../lib/variants';
 import { Product } from '../lib/products';
 import { SizeGuideModal } from './SizeGuideModal';
 
@@ -53,6 +54,7 @@ export function ProductClient({ product }: { product: Product }) {
         qty: 1,
         color: selectedColor,
         size: selectedSize,
+        variantId: findVariantId(product, selectedSize, selectedColor) || undefined,
       });
     }
   };

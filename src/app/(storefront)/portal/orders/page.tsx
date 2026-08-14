@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useStore } from '@/storefront/lib/StoreContext';
 import { PUBLISHABLE_KEY } from '@/storefront/lib/medusa';
+import { formatMoney } from '@/storefront/lib/money';
 
 export default function PortalOrdersPage() {
   const { user } = useStore();
@@ -67,7 +68,7 @@ export default function PortalOrdersPage() {
                 </div>
                 <div>
                   <p style={{ fontSize: '12px', color: 'var(--mid)', marginBottom: '4px' }}>TOTAL</p>
-                  <p>${(order.total / 100).toFixed(2)}</p>
+                  <p>{formatMoney(order.total, order.currency_code || order.region?.currency_code || 'EUR')}</p>
                 </div>
               </div>
               

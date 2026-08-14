@@ -3,11 +3,23 @@
 import { useStore } from '@/storefront/lib/StoreContext';
 import { useEffect, useState } from 'react';
 import { medusaClient } from '@/storefront/lib/medusa';
+import { applyCustomerToken } from '@/storefront/lib/cart';
+import { formatMoney } from '@/storefront/lib/money';
 import { GlobalAddressAutocomplete, AddressData } from '@/storefront/components/GlobalAddressAutocomplete';
 import Link from 'next/link';
 
+function pickPaymentProvider(providers: any[]): string | null {
+  const ids = (providers || []).map((provider) => provider.id || provider.provider_id)
+  return (
+    ids.find((id: string) => String(id).includes('mollie')) ||
+    ids.find((id: string) => String(id).includes('system_default')) ||
+    ids[0] ||
+    null
+  )
+}
+
 export default function CheckoutPage() {
-  const { cart, medusaCartId, setMedusaCartId, setCartOpen, user } = useStore();
+  const { cart, medusaCart, medusaCartId, setMedusaCartId, user, clearCart } = useStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1); 
@@ -20,61 +32,43 @@ export default function CheckoutPage() {
   const [promoError, setPromoError] = useState('');
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [mollieCheckoutUrl, setMollieCheckoutUrl] = useState<string | null>(null);
+  const [paymentProvider, setPaymentProvider] = useState<string | null>(null);
+  const [orderId, setOrderId] = useState<string | null>(null);
+
+  const currency = syncedCart?.region?.currency_code || medusaCart?.region?.currency_code || 'EUR'
 
   useEffect(() => {
-    if (cart.length === 0 && !medusaCartId) {
-      window.location.href = '/';
-      return;
-    }
-
     const initCart = async () => {
       setLoading(true);
       setError(null);
+      applyCustomerToken()
       try {
-        let currentCartId = medusaCartId;
-        const { regions } = await medusaClient.store.region.list();
-        if (!regions || regions.length === 0) throw new Error("No regions configured in Medusa");
-        const region = regions[0];
-
-        if (!currentCartId) {
-          const { cart: newCart } = await medusaClient.store.cart.create({ region_id: region.id });
-          currentCartId = newCart.id;
-          setMedusaCartId(newCart.id);
+        const cartId = medusaCartId || (typeof window !== 'undefined' ? localStorage.getItem('cart_id') : null)
+        if (!cartId) {
+          setError('Your bag is empty. Add a product from the shop before checking out.')
+          return
         }
 
-        const { cart: existingCart } = await medusaClient.store.cart.retrieve(currentCartId as string);
-        for (const item of existingCart.items || []) {
-          await medusaClient.store.cart.deleteLineItem(currentCartId as string, item.id);
+        const { cart: existingCart } = await medusaClient.store.cart.retrieve(cartId, {
+          fields: '*items,*items.variant,*region,*shipping_methods',
+        });
+
+        if (!existingCart?.items?.length && cart.length === 0) {
+          setError('Your bag is empty. Add a product from the shop before checking out.')
+          return
         }
 
-        for (const localItem of cart) {
-          let variantId = null;
-          if (localItem.product.variants && localItem.product.variants.length > 0) {
-            const variant = localItem.product.variants.find((v: any) => {
-               const sizeMatch = v.options?.find((o: any) => o.value === localItem.size);
-               return !!sizeMatch; 
-            });
-            variantId = variant ? variant.id : localItem.product.variants[0].id;
-          }
-
-          if (variantId) {
-            await medusaClient.store.cart.createLineItem(currentCartId as string, {
-              variant_id: variantId,
-              quantity: localItem.qty
-            });
-          }
+        if (user?.email && existingCart.email !== user.email) {
+          const { cart: withEmail } = await medusaClient.store.cart.update(cartId, { email: user.email })
+          setSyncedCart(withEmail)
+          setMedusaCartId(withEmail.id)
+        } else {
+          setSyncedCart(existingCart)
+          setMedusaCartId(existingCart.id)
         }
-
-        const { cart: finalCart } = await medusaClient.store.cart.retrieve(currentCartId as string);
-        setSyncedCart(finalCart);
-
       } catch (err: any) {
         console.error("FULL CHECKOUT ERROR:", err);
-        let errorMsg = err.message || err.toString();
-        if (err.response && err.response.data && err.response.data.message) {
-           errorMsg = err.response.data.message;
-        }
-        setError("Failed to initialize checkout: " + errorMsg);
+        setError("Failed to initialize checkout: " + (err.message || err.toString()));
       } finally {
         setLoading(false);
       }
@@ -86,28 +80,32 @@ export default function CheckoutPage() {
   }, []);
 
   const handleAddressSubmit = async (addressData: AddressData) => {
-    if (!medusaCartId) return;
+    const cartId = medusaCartId || syncedCart?.id
+    if (!cartId) return;
     setLoading(true);
     setError(null);
     try {
-      const { cart: updatedCart } = await medusaClient.store.cart.update(medusaCartId, {
-        email: addressData.email || user?.email || "guest@example.com",
-        shipping_address: {
-          first_name: addressData.first_name,
-          last_name: addressData.last_name,
-          company: addressData.company,
-          address_1: addressData.address_1,
-          address_2: addressData.address_2,
-          city: addressData.city,
-          province: addressData.province,
-          postal_code: addressData.postal_code,
-          country_code: addressData.country_code,
-          phone: addressData.phone
-        }
+      applyCustomerToken()
+      const shipping = {
+        first_name: addressData.first_name,
+        last_name: addressData.last_name,
+        company: addressData.company,
+        address_1: addressData.address_1,
+        address_2: addressData.address_2,
+        city: addressData.city,
+        province: addressData.province,
+        postal_code: addressData.postal_code,
+        country_code: addressData.country_code,
+        phone: addressData.phone
+      }
+      const { cart: updatedCart } = await medusaClient.store.cart.update(cartId, {
+        email: addressData.email || user?.email,
+        shipping_address: shipping,
+        billing_address: shipping,
       });
       setSyncedCart(updatedCart);
       
-      const { shipping_options } = await medusaClient.store.fulfillment.listCartOptions({ cart_id: medusaCartId });
+      const { shipping_options } = await medusaClient.store.fulfillment.listCartOptions({ cart_id: cartId });
       setShippingOptions(shipping_options || []);
       if (shipping_options?.length > 0) setSelectedShippingOption(shipping_options[0].id);
       
@@ -120,22 +118,37 @@ export default function CheckoutPage() {
   };
 
   const handleShippingSubmit = async () => {
-    if (!medusaCartId || !selectedShippingOption) return;
+    const cartId = medusaCartId || syncedCart?.id
+    if (!cartId || !selectedShippingOption) return;
     setLoading(true);
     setError(null);
     try {
-      await medusaClient.store.cart.addShippingMethod(medusaCartId, { option_id: selectedShippingOption });
-      const res = await medusaClient.store.payment.initiatePaymentSession(medusaCartId, { provider_id: "pp_mollie-hosted-checkout_mollie" }).catch(e => {
-        console.error("Mollie init failed:", e);
+      applyCustomerToken()
+      await medusaClient.store.cart.addShippingMethod(cartId, { option_id: selectedShippingOption });
+      const { cart: cartWithShipping } = await medusaClient.store.cart.retrieve(cartId)
+      setSyncedCart(cartWithShipping)
+
+      const { payment_providers } = await medusaClient.store.payment.listPaymentProviders({
+        region_id: cartWithShipping?.region_id || cartWithShipping?.region?.id,
+      }).catch(() => ({ payment_providers: [] as any[] }))
+
+      const providerId = pickPaymentProvider(payment_providers) || 'pp_system_default'
+      setPaymentProvider(providerId)
+
+      const res = await medusaClient.store.payment.initiatePaymentSession(cartWithShipping, { provider_id: providerId }).catch((e) => {
+        console.error("Payment init failed:", e);
         return null;
       });
-      
+
       if (res && res.payment_collection && res.payment_collection.payment_sessions) {
-         const session = res.payment_collection.payment_sessions.find((s: any) => s.provider_id === 'pp_mollie-hosted-checkout_mollie');
+         const session = res.payment_collection.payment_sessions.find((s: any) => s.provider_id === providerId);
          if (session && session.data && session.data.checkout_url) {
             setMollieCheckoutUrl(session.data.checkout_url as string);
          }
       }
+
+      const { cart: updatedCart } = await medusaClient.store.cart.retrieve(cartId)
+      setSyncedCart(updatedCart)
       setStep(3);
     } catch (err: any) {
       setError(err.message || "Failed to add shipping method.");
@@ -145,18 +158,21 @@ export default function CheckoutPage() {
   };
 
   const handlePaymentSubmit = async () => {
-    if (!medusaCartId) return;
+    const cartId = medusaCartId || syncedCart?.id
+    if (!cartId) return;
     setLoading(true);
     setError(null);
     try {
+      applyCustomerToken()
       if (mollieCheckoutUrl) {
          window.location.href = mollieCheckoutUrl;
          return;
       }
 
-      const { type } = await medusaClient.store.cart.complete(medusaCartId);
-      if (type === 'order') {
-        setMedusaCartId(null);
+      const result = await medusaClient.store.cart.complete(cartId);
+      if (result.type === 'order') {
+        setOrderId(result.order?.id || result.order?.display_id || null)
+        clearCart();
         setStep(4);
       } else {
         setError("Failed to complete order. Cart requires further action.");
@@ -169,12 +185,13 @@ export default function CheckoutPage() {
   };
 
   const handleApplyPromo = async () => {
-    if (!medusaCartId || !promoCode) return;
+    const cartId = medusaCartId || syncedCart?.id
+    if (!cartId || !promoCode) return;
     setPromoLoading(true);
     setPromoError('');
     try {
-      await medusaClient.store.cart.addPromotions(medusaCartId, { promo_codes: [promoCode] });
-      const { cart: updatedCart } = await medusaClient.store.cart.retrieve(medusaCartId);
+      await medusaClient.store.cart.addPromotions(cartId, { promo_codes: [promoCode] });
+      const { cart: updatedCart } = await medusaClient.store.cart.retrieve(cartId);
       setSyncedCart(updatedCart);
       setPromoCode('');
     } catch (err: any) {
@@ -185,6 +202,7 @@ export default function CheckoutPage() {
   };
 
   const total = syncedCart ? (syncedCart.total || 0) : cart.reduce((sum, item) => sum + item.product.price * item.qty, 0);
+  const displayItems = syncedCart?.items?.length ? syncedCart.items : cart
 
   if (step === 4) {
     return (
@@ -193,8 +211,11 @@ export default function CheckoutPage() {
           <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--black)" strokeWidth="1.5"><circle cx="12" cy="12" r="10"></circle><polyline points="16 12 12 8 8 12"></polyline><line x1="12" y1="16" x2="12" y2="8"></line></svg>
         </div>
         <h1 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: '48px', textTransform: 'uppercase', marginBottom: '16px' }}>Order Confirmed!</h1>
-        <p style={{ color: 'var(--mid)', marginBottom: '32px' }}>Thank you for your purchase. A confirmation email is on its way. You can view your order details in the portal.</p>
-        <Link href="/portal" className="btn-primary" style={{ padding: '16px 32px' }}>VIEW ORDER</Link>
+        <p style={{ color: 'var(--mid)', marginBottom: '32px' }}>
+          Thank you for your purchase. {orderId ? `Order ${orderId} is now in Medusa.` : 'Your order is now in Medusa.'}
+          {user ? ' You can view it in the portal.' : ' Create an account with the same email to track it later.'}
+        </p>
+        <Link href={user ? "/portal/orders" : "/"} className="btn-primary" style={{ padding: '16px 32px' }}>{user ? 'VIEW ORDER' : 'CONTINUE SHOPPING'}</Link>
       </div>
     );
   }
@@ -203,7 +224,6 @@ export default function CheckoutPage() {
     <div className="checkout-layout">
       
       <div className="checkout-main">
-        {/* PROGRESS INDICATOR */}
         <div className="checkout-progress">
           <span className={`checkout-step ${step >= 1 ? 'active' : ''}`}>1. Shipping</span>
           <span className="checkout-step-separator">›</span>
@@ -218,7 +238,6 @@ export default function CheckoutPage() {
           </div>
         )}
 
-        {/* STEP 1: SHIPPING */}
         <div className="checkout-accordion-item">
           <div className="checkout-accordion-header" onClick={() => step > 1 && setStep(1)}>
             <h2 className="checkout-accordion-title">
@@ -253,7 +272,6 @@ export default function CheckoutPage() {
           )}
         </div>
 
-        {/* STEP 2: DELIVERY */}
         <div className="checkout-accordion-item" style={{ opacity: step < 2 ? 0.5 : 1, pointerEvents: step < 2 ? 'none' : 'auto' }}>
           <div className="checkout-accordion-header" onClick={() => step > 2 && setStep(2)}>
             <h2 className="checkout-accordion-title">
@@ -265,14 +283,14 @@ export default function CheckoutPage() {
           
           {step === 2 && (
             <div className="checkout-accordion-body">
-              {shippingOptions.length === 0 ? <p>No shipping options available.</p> : null}
+              {shippingOptions.length === 0 ? <p>No shipping options available. Seed Kindard shipping in Medusa (`pnpm --prefix backend run seed:demo`).</p> : null}
               {shippingOptions.map(opt => (
                 <label key={opt.id} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', border: '1px solid #eee', marginBottom: '12px', cursor: 'pointer', background: selectedShippingOption === opt.id ? '#f9f9f9' : '#fff' }}>
                   <input type="radio" name="shipping" checked={selectedShippingOption === opt.id} onChange={() => setSelectedShippingOption(opt.id)} style={{ width: '18px', height: '18px' }} />
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 600 }}>{opt.name}</div>
                   </div>
-                  <div style={{ fontWeight: 600 }}>{syncedCart?.region?.currency_code?.toUpperCase()} {opt.amount}</div>
+                  <div style={{ fontWeight: 600 }}>{formatMoney(opt.amount, currency)}</div>
                 </label>
               ))}
               <button onClick={handleShippingSubmit} className="btn-primary" style={{ width: '100%', marginTop: '16px' }} disabled={loading || !selectedShippingOption}>
@@ -282,12 +300,11 @@ export default function CheckoutPage() {
           )}
           {step > 2 && syncedCart?.shipping_methods && syncedCart.shipping_methods[0] && (
             <div className="checkout-summary-box">
-              {syncedCart.shipping_methods[0].shipping_option?.name} — {syncedCart?.region?.currency_code?.toUpperCase()} {syncedCart.shipping_methods[0].amount}
+              {syncedCart.shipping_methods[0].shipping_option?.name || 'Shipping'} — {formatMoney(syncedCart.shipping_methods[0].amount, currency)}
             </div>
           )}
         </div>
 
-        {/* STEP 3: PAYMENT */}
         <div className="checkout-accordion-item" style={{ opacity: step < 3 ? 0.5 : 1, pointerEvents: step < 3 ? 'none' : 'auto' }}>
           <div className="checkout-accordion-header">
             <h2 className="checkout-accordion-title">
@@ -301,14 +318,20 @@ export default function CheckoutPage() {
               <div style={{ padding: '16px', border: '1px solid #ddd', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                 <div>
-                  <div style={{ fontWeight: 600 }}>Secure Payment</div>
-                  <div style={{ fontSize: '13px', color: 'var(--mid)' }}>All transactions are secure and encrypted.</div>
+                  <div style={{ fontWeight: 600 }}>{mollieCheckoutUrl ? 'Mollie hosted checkout' : 'Secure payment'}</div>
+                  <div style={{ fontSize: '13px', color: 'var(--mid)' }}>
+                    {mollieCheckoutUrl
+                      ? 'You will be redirected to Mollie to finish payment.'
+                      : paymentProvider
+                        ? `Provider: ${paymentProvider}. Orders are created in the Medusa backend.`
+                        : 'Add a Mollie API key in backend/.env for live payments, or use the system provider locally.'}
+                  </div>
                 </div>
               </div>
               
               <button onClick={handlePaymentSubmit} className="btn-primary" style={{ width: '100%', fontSize: '18px', padding: '18px' }} disabled={loading}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: '8px' }}><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                {loading ? 'PROCESSING...' : `PAY SECURELY ${syncedCart?.region?.currency_code?.toUpperCase() || ''} ${total}`}
+                {loading ? 'PROCESSING...' : `PAY ${formatMoney(total, currency)}`}
               </button>
             </div>
           )}
@@ -316,7 +339,6 @@ export default function CheckoutPage() {
 
       </div>
 
-      {/* ORDER SUMMARY */}
       <div className="checkout-sidebar">
         
         <button className="order-summary-accordion-btn" onClick={() => setSummaryOpen(!summaryOpen)}>
@@ -324,7 +346,7 @@ export default function CheckoutPage() {
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
             {summaryOpen ? 'Hide' : 'Show'} Order Summary
           </span>
-          <span>{syncedCart?.region?.currency_code?.toUpperCase() || '$'} {syncedCart?.total || total}</span>
+          <span>{formatMoney(syncedCart?.total || total, currency)}</span>
         </button>
 
         <div className={`checkout-sidebar-content ${summaryOpen ? 'open' : ''}`}>
@@ -333,7 +355,7 @@ export default function CheckoutPage() {
             
             <div style={{ maxHeight: '400px', overflowY: 'auto', paddingRight: '8px', marginBottom: '24px' }}>
               {syncedCart?.items?.map((item: any, i: number) => (
-                <div key={i} style={{ display: 'flex', gap: '16px', marginBottom: '16px' }}>
+                <div key={item.id || i} style={{ display: 'flex', gap: '16px', marginBottom: '16px' }}>
                   <div style={{ width: '64px', height: '64px', background: '#f5f5f5', border: '1px solid #eee', position: 'relative' }}>
                     {item.thumbnail && <img src={item.thumbnail} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
                     <span style={{ position: 'absolute', top: '-8px', right: '-8px', background: 'var(--mid)', color: 'var(--white)', width: '20px', height: '20px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 600 }}>{item.quantity}</span>
@@ -342,7 +364,7 @@ export default function CheckoutPage() {
                     <div style={{ fontWeight: 600, fontSize: '14px' }}>{item.title}</div>
                     <div style={{ color: 'var(--mid)', fontSize: '13px' }}>{item.variant?.title}</div>
                   </div>
-                  <div style={{ fontWeight: 600, fontSize: '14px' }}>{syncedCart?.region?.currency_code?.toUpperCase()} {item.total}</div>
+                  <div style={{ fontWeight: 600, fontSize: '14px' }}>{formatMoney(item.total, currency)}</div>
                 </div>
               ))}
               {(!syncedCart?.items || syncedCart.items.length === 0) && cart.map((item, i) => (
@@ -355,7 +377,7 @@ export default function CheckoutPage() {
                     <div style={{ fontWeight: 600, fontSize: '14px' }}>{item.product.name}</div>
                     <div style={{ color: 'var(--mid)', fontSize: '13px' }}>{item.color} / {item.size}</div>
                   </div>
-                  <div style={{ fontWeight: 600, fontSize: '14px' }}>${(item.product.price * item.qty).toFixed(2)}</div>
+                  <div style={{ fontWeight: 600, fontSize: '14px' }}>{formatMoney(item.product.price * item.qty, currency)}</div>
                 </div>
               ))}
             </div>
@@ -383,27 +405,27 @@ export default function CheckoutPage() {
                 
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: 'var(--mid)' }}>Subtotal</span>
-                  <span style={{ fontWeight: 600 }}>{syncedCart.subtotal}</span>
+                  <span style={{ fontWeight: 600 }}>{formatMoney(syncedCart.subtotal, currency)}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: 'var(--mid)' }}>Shipping</span>
-                  <span style={{ fontWeight: 600 }}>{syncedCart.shipping_total || 'Calculated next step'}</span>
+                  <span style={{ fontWeight: 600 }}>{syncedCart.shipping_total != null ? formatMoney(syncedCart.shipping_total, currency) : 'Calculated next step'}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: 'var(--mid)' }}>Estimated Taxes</span>
-                  <span style={{ fontWeight: 600 }}>{syncedCart.tax_total || 0}</span>
+                  <span style={{ fontWeight: 600 }}>{formatMoney(syncedCart.tax_total || 0, currency)}</span>
                 </div>
                 
                 {syncedCart.discount_total > 0 && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--red)', fontWeight: 600 }}>
                     <span>Discount</span>
-                    <span>-{syncedCart.discount_total}</span>
+                    <span>-{formatMoney(syncedCart.discount_total, currency)}</span>
                   </div>
                 )}
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 900, fontSize: '24px', marginTop: '8px', paddingTop: '16px', borderTop: '1.5px solid var(--black)', fontFamily: "'Barlow Condensed', sans-serif" }}>
                   <span>Total</span>
-                  <span>{syncedCart.region?.currency_code?.toUpperCase()} {syncedCart.total || total}</span>
+                  <span>{formatMoney(syncedCart.total || total, currency)}</span>
                 </div>
               </div>
             )}
@@ -419,7 +441,7 @@ export default function CheckoutPage() {
               </div>
               <div className="checkout-trust-badge">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                Need help? <a href="#" style={{ textDecoration: 'underline' }}>Contact Support</a>
+                Need help? <a href="/help-contact" style={{ textDecoration: 'underline' }}>Contact Support</a>
               </div>
             </div>
           </div>

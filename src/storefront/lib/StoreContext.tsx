@@ -2,24 +2,30 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Product } from './products';
-import { mapMedusaProduct } from './medusa-mapper';
 import { medusaClient } from './medusa';
+import { findVariantId } from './variants';
+import {
+  addLineItemToMedusa,
+  applyCustomerToken,
+  initMedusaCart,
+  mapCartItems,
+  persistCartId,
+  removeLineItemFromMedusa,
+  updateLineItemInMedusa,
+  type CartItem,
+} from './cart';
 
-export type CartItem = {
-  lineItemId?: string;
-  product: Product;
-  size: string;
-  color: string;
-  qty: number;
-};
+export type { CartItem }
 
 type StoreContextType = {
   cart: CartItem[];
+  medusaCart: any | null;
   medusaCartId: string | null;
   setMedusaCartId: (id: string | null) => void;
   addToCart: (item: CartItem) => Promise<void>;
   removeFromCart: (index: number) => Promise<void>;
   updateQty: (index: number, qty: number) => Promise<void>;
+  clearCart: () => void;
   isCartOpen: boolean;
   setCartOpen: (open: boolean) => void;
   isMenuOpen: boolean;
@@ -28,18 +34,22 @@ type StoreContextType = {
   setDetailOpen: (open: boolean) => void;
   selectedProduct: Product | null;
   setSelectedProduct: (product: Product | null) => void;
-  user: any | null; // Customer data from Medusa
+  user: any | null;
   authLoading: boolean;
   isAdmin: boolean;
   cartLoading: boolean;
+  cartError: string | null;
   refreshUser: () => Promise<void>;
+  logout: () => Promise<void>;
 };
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [medusaCart, setMedusaCart] = useState<any>(null);
+  const [cart, setCart] = useState<CartItem[]>([]);
   const [cartLoading, setCartLoading] = useState(false);
+  const [cartError, setCartError] = useState<string | null>(null);
   const [isCartOpen, setCartOpen] = useState(false);
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [isDetailOpen, setDetailOpen] = useState(false);
@@ -48,91 +58,133 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [authLoading, setAuthLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
+  const applyCart = (nextCart: any | null) => {
+    setMedusaCart(nextCart)
+    setCart(nextCart ? mapCartItems(nextCart) : [])
+    persistCartId(nextCart?.id || null)
+  }
+
   const refreshUser = async () => {
     setAuthLoading(true);
     try {
       const token = typeof window !== 'undefined' ? localStorage.getItem('medusa_token') : null;
+      applyCustomerToken()
       if (!token) {
         setUser(null);
         setAuthLoading(false);
         return;
       }
 
-      const baseUrl = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || (typeof window !== 'undefined' ? '/medusa' : "http://127.0.0.1:9000");
-      const res = await fetch(`${baseUrl}/store/customers/me`, {
-        headers: {
-          'x-publishable-api-key': process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || '',
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (!res.ok) throw new Error('Not logged in');
-      const data = await res.json();
-      setUser(data.customer);
+      const { customer } = await medusaClient.store.customer.retrieve()
+      setUser(customer);
     } catch (e) {
       setUser(null);
       if (typeof window !== 'undefined') localStorage.removeItem('medusa_token');
+      applyCustomerToken()
     }
     setAuthLoading(false);
   };
 
+  const logout = async () => {
+    if (typeof window !== 'undefined') localStorage.removeItem('medusa_token')
+    applyCustomerToken()
+    setUser(null)
+    try {
+      await fetch('/api/admin/logout', { method: 'POST' })
+    } catch {
+      // Admin session may not exist.
+    }
+  }
+
   useEffect(() => {
-    // Check for admin
     fetch('/api/admin/me')
       .then(res => res.json())
       .then(data => setIsAdmin(!!data.isAdmin))
       .catch(() => setIsAdmin(false));
 
-    // Check for Medusa customer
     refreshUser();
+    initMedusaCart()
+      .then((cart) => applyCart(cart))
+      .catch((error) => setCartError(error?.message || 'Could not load bag'))
   }, []);
-
-  const [cart, setCart] = useState<CartItem[]>([]);
 
   const addToCart = async (item: CartItem) => {
     setCartOpen(true);
     setCartLoading(true);
-    await new Promise(r => setTimeout(r, 400));
-    setCart(prev => {
-      const existing = prev.findIndex(i => i.product.id === item.product.id && i.size === item.size && i.color === item.color);
-      if (existing >= 0) {
-        const next = [...prev];
-        next[existing].qty += item.qty;
-        return next;
+    setCartError(null)
+    try {
+      const variantId = item.variantId || findVariantId(item.product, item.size, item.color)
+      if (!variantId) {
+        throw new Error('This product is missing a purchasable variant in Medusa.')
       }
-      return [...prev, item];
-    });
-    setCartLoading(false);
+      let cartId = medusaCart?.id as string | undefined
+      if (!cartId) {
+        const created = await initMedusaCart()
+        cartId = created?.id
+        applyCart(created)
+      }
+      if (!cartId) throw new Error('Could not create a Medusa cart.')
+      const next = await addLineItemToMedusa(cartId, variantId, item.qty || 1)
+      applyCart(next)
+    } catch (error: any) {
+      setCartError(error?.message || 'Could not add item to bag')
+    } finally {
+      setCartLoading(false);
+    }
   };
 
   const removeFromCart = async (index: number) => {
+    const item = cart[index]
+    if (!item?.lineItemId || !medusaCart?.id) return
     setCartLoading(true);
-    await new Promise(r => setTimeout(r, 200));
-    setCart(prev => prev.filter((_, i) => i !== index));
-    setCartLoading(false);
+    setCartError(null)
+    try {
+      const next = await removeLineItemFromMedusa(medusaCart.id, item.lineItemId)
+      applyCart(next)
+    } catch (error: any) {
+      setCartError(error?.message || 'Could not remove item')
+    } finally {
+      setCartLoading(false);
+    }
   };
 
   const updateQty = async (index: number, qty: number) => {
-    if (qty < 1) return;
+    const item = cart[index]
+    if (!item?.lineItemId || !medusaCart?.id) return
     setCartLoading(true);
-    await new Promise(r => setTimeout(r, 200));
-    setCart(prev => {
-      const next = [...prev];
-      next[index].qty = qty;
-      return next;
-    });
-    setCartLoading(false);
+    setCartError(null)
+    try {
+      const next = await updateLineItemInMedusa(medusaCart.id, item.lineItemId, qty)
+      applyCart(next)
+    } catch (error: any) {
+      setCartError(error?.message || 'Could not update quantity')
+    } finally {
+      setCartLoading(false);
+    }
   };
+
+  const clearCart = () => {
+    applyCart(null)
+  }
 
   return (
     <StoreContext.Provider
       value={{
         cart,
+        medusaCart,
         medusaCartId: medusaCart?.id || null,
-        setMedusaCartId: (id: string | null) => setMedusaCart(id ? { id } : null),
+        setMedusaCartId: (id: string | null) => {
+          if (!id) {
+            applyCart(null)
+            return
+          }
+          persistCartId(id)
+          initMedusaCart().then(applyCart)
+        },
         addToCart,
         removeFromCart,
         updateQty,
+        clearCart,
         isCartOpen,
         setCartOpen,
         isMenuOpen,
@@ -145,7 +197,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         authLoading,
         isAdmin,
         cartLoading,
+        cartError,
         refreshUser,
+        logout,
       }}
     >
       {children}

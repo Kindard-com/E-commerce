@@ -2,14 +2,15 @@
 
 import Image from 'next/image';
 import { useStore } from '../lib/StoreContext';
+import { formatMoney, cartCurrency } from '../lib/money';
 import Link from 'next/link';
 export function CartPanel() {
-  const { cart, isCartOpen, setCartOpen, removeFromCart, updateQty, cartLoading } = useStore();
+  const { cart, medusaCart, isCartOpen, setCartOpen, removeFromCart, updateQty, cartLoading, cartError } = useStore();
 
-  const subtotal = cart.reduce((sum, item) => sum + item.product.price * item.qty, 0);
-  // Example discount logic
-  const discount = subtotal > 0 ? 0 : 0; 
-  const total = subtotal - discount;
+  const currency = cartCurrency(medusaCart)
+  const subtotal = medusaCart?.subtotal ?? cart.reduce((sum, item) => sum + item.product.price * item.qty, 0);
+  const discount = medusaCart?.discount_total || 0
+  const total = medusaCart?.total ?? subtotal - discount;
 
   return (
     <>
@@ -20,13 +21,16 @@ export function CartPanel() {
         </div>
         
         <div className="cart-items" style={{ opacity: cartLoading ? 0.5 : 1, pointerEvents: cartLoading ? 'none' : 'auto', transition: 'opacity 0.2s' }}>
+          {cartError && (
+            <div style={{ padding: '12px 24px', color: 'var(--red)', fontSize: '13px' }}>{cartError}</div>
+          )}
           {cart.length === 0 ? (
             <div style={{ padding: '24px', textAlign: 'center', fontFamily: "'Barlow Condensed', sans-serif" }}>
               Your bag is empty.
             </div>
           ) : (
             cart.map((item, i) => (
-              <div key={i} className="cart-item">
+              <div key={item.lineItemId || i} className="cart-item">
                 <div className="cart-item-img" style={{ position: 'relative' }}>
                   {item.product.image ? (
                     <Image 
@@ -50,7 +54,7 @@ export function CartPanel() {
                       <div className="qty-num">{item.qty}</div>
                       <button className="qty-btn" onClick={() => updateQty(i, item.qty + 1)}>+</button>
                     </div>
-                    <div className="cart-item-price">${item.product.price}</div>
+                    <div className="cart-item-price">{formatMoney(item.product.price, currency)}</div>
                     <button className="remove-btn" onClick={() => removeFromCart(i)}>Remove</button>
                   </div>
                 </div>
@@ -61,10 +65,10 @@ export function CartPanel() {
 
         <div className="cart-footer">
           <div className="cart-totals">
-            <div className="cart-row"><span>Subtotal</span><span>${subtotal}</span></div>
-            <div className="cart-row"><span>Discount</span><span style={{ color: 'var(--red)' }}>-${discount}</span></div>
-            <div className="cart-row"><span>Shipping</span><span>Free</span></div>
-            <div className="cart-row total"><span>Total</span><span>${total}</span></div>
+            <div className="cart-row"><span>Subtotal</span><span>{formatMoney(subtotal, currency)}</span></div>
+            <div className="cart-row"><span>Discount</span><span style={{ color: 'var(--red)' }}>-{formatMoney(discount, currency)}</span></div>
+            <div className="cart-row"><span>Shipping</span><span>{medusaCart?.shipping_total ? formatMoney(medusaCart.shipping_total, currency) : 'Calculated at checkout'}</span></div>
+            <div className="cart-row total"><span>Total</span><span>{formatMoney(total, currency)}</span></div>
           </div>
           
           <div style={{ textAlign: 'center', marginBottom: '12px', fontSize: '11px', color: 'var(--mid)', letterSpacing: '.06em', textTransform: 'uppercase', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
@@ -73,7 +77,7 @@ export function CartPanel() {
 
           <Link href="/checkout" className="checkout-btn" style={{ pointerEvents: cart.length === 0 ? 'none' : 'auto', opacity: cart.length === 0 ? 0.5 : 1, textDecoration: 'none', display: 'flex', justifyContent: 'space-between' }} onClick={() => setCartOpen(false)}>
             <span>SECURE CHECKOUT</span>
-            <span>${total.toFixed(2)}</span>
+            <span>{formatMoney(total, currency)}</span>
           </Link>
           
           <div style={{ marginTop: '16px', display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center' }}>
