@@ -133,7 +133,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
   }
 
   // Render Shop Layout
-  const allProducts: Product[] = await loadMedusaProducts(100);
+  const { products: allProducts } = await loadMedusaProducts(100);
 
   let filteredProducts = allProducts;
   

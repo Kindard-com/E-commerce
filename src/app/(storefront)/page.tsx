@@ -5,7 +5,7 @@ import { Sidebar } from '@/storefront/components/Sidebar';
 import { ProductGrid } from '@/storefront/components/ProductGrid';
 import { FilterBar } from '@/storefront/components/FilterBar';
 import Link from 'next/link';
-import { isFallbackCatalog, loadMedusaProducts } from '@/storefront/lib/load-products';
+import { isMedusaUnavailable, loadMedusaProducts } from '@/storefront/lib/load-products';
 import { FaqAccordion } from '@/storefront/components/FaqAccordion';
 import { AutoRefreshFallback } from '@/storefront/components/AutoRefreshFallback';
 import { getPayload } from 'payload';
@@ -55,7 +55,7 @@ export default async function Home() {
     features: []
   };
 
-  const products: Product[] = await loadMedusaProducts(20);
+  const { products, source } = await loadMedusaProducts(20);
 
   return (
     <>
@@ -94,7 +94,7 @@ export default async function Home() {
         <div className="trust-item"><span className="trust-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></span> Secure Checkout Guarantee</div>
       </div>
 
-      <AutoRefreshFallback isFallback={isFallbackCatalog(products)} />
+      <AutoRefreshFallback isFallback={isMedusaUnavailable(source)} />
       <FilterBar resultCount={products.length} />
       
       <div className="shop-layout">

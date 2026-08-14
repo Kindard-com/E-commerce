@@ -24,7 +24,8 @@ async function getProduct(rawId: string): Promise<Product | null> {
 }
 
 async function getRelatedProducts(product: Product): Promise<Product[]> {
-  const allProducts: Product[] = (await loadMedusaProducts(50)).filter(
+  const { products: catalogProducts } = await loadMedusaProducts(50);
+  const allProducts: Product[] = catalogProducts.filter(
     (p) =>
       String(p.id) !== String(product.id) &&
       String(p.medusa_id) !== String(product.id) &&

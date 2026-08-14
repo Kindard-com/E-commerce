@@ -1,28 +1,41 @@
 {
   "ok": true,
-  "generatedAt": "2026-08-14T07:11:52.000Z",
-  "unit": {
-    "ok": true,
-    "passed": 3,
-    "failed": 0,
-    "files": [
-      "tests/unit/medusa-mapper.spec.ts",
-      "tests/unit/medusa-sdk.spec.ts"
-    ],
-    "checks": [
-      "mapMedusaProduct maps store API calculated prices",
-      "mapMedusaProduct maps admin API EUR prices",
-      "@medusajs/js-sdk exposes store.product, store.cart, store.region, admin.product"
-    ]
-  },
-  "live": {
-    "ok": false,
-    "command": "npm run test:sdk",
-    "reason": "Medusa on :9000 was not available in this run (db:migrate hung after creating mikro_orm_migrations). Storefront used the fallback catalog and store SDK client construction still passed unit tests."
-  },
-  "web": {
-    "storefront": "http://localhost:3000 → 200",
-    "payloadAdmin": "http://localhost:3000/admin → create-first-user",
-    "cdnHealth": "http://localhost:3001/api/system/health → operational"
-  }
+  "baseUrl": "http://127.0.0.1:9000",
+  "hasPublishableKey": true,
+  "hasAdminKey": false,
+  "passed": 5,
+  "total": 6,
+  "checks": [
+    {
+      "name": "sdk.namespaces",
+      "ok": true,
+      "detail": "store=[region, collection, category, product, cart, fulfillment, payment, order, customer, locale, client]"
+    },
+    {
+      "name": "health",
+      "ok": true,
+      "detail": "OK"
+    },
+    {
+      "name": "store.region.list",
+      "ok": true,
+      "detail": "1 region(s)"
+    },
+    {
+      "name": "store.product.list",
+      "ok": true,
+      "detail": "4 product(s): Medusa Sweatshirt, Medusa T-Shirt, Medusa Shorts, Medusa Sweatpants"
+    },
+    {
+      "name": "admin.product.list",
+      "ok": false,
+      "detail": "MEDUSA_ADMIN_API_KEY not set"
+    },
+    {
+      "name": "store.cart.create",
+      "ok": true,
+      "detail": "cart_01KZZK7109TAQ4N1A9YSZVCJCZ"
+    }
+  ],
+  "generatedAt": "2026-08-14T07:36:34.118Z"
 }

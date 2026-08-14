@@ -4,7 +4,16 @@
  */
 import { mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
-import Medusa from '@medusajs/js-sdk'
+import dotenv from 'dotenv'
+import MedusaImport from '@medusajs/js-sdk'
+
+dotenv.config()
+dotenv.config({ path: path.join(process.cwd(), 'backend', '.env') })
+
+const Medusa =
+  typeof MedusaImport === 'function'
+    ? MedusaImport
+    : (MedusaImport as { default: typeof MedusaImport }).default
 
 type Check = {
   name: string

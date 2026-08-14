@@ -61,7 +61,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const baseUrl = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || (typeof window !== 'undefined' ? '/medusa' : "http://127.0.0.1:9000");
       const res = await fetch(`${baseUrl}/store/customers/me`, {
         headers: {
-          'x-publishable-api-key': process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_example_from_env",
+          'x-publishable-api-key': process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || '',
           'Authorization': `Bearer ${token}`
         }
       });

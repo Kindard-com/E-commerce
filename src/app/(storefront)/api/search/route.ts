@@ -11,7 +11,8 @@ export async function GET(request: Request) {
   const q = searchParams.get('q')?.toLowerCase() || '';
   const authHeader = request.headers.get('authorization');
   
-  let allProducts: Product[] = await loadMedusaProducts(100, q || undefined);
+  const { products: loadedProducts } = await loadMedusaProducts(100, q || undefined);
+  let allProducts: Product[] = loadedProducts;
   if (allProducts.length === 0 && !q) allProducts = fallbackProducts;
   let allArticles: any[] = [];
 
