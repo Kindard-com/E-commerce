@@ -109,6 +109,33 @@ nav {
 .nav-center a:hover { text-decoration: underline; }
 .nav-center a.sale { color: var(--red); }
 .nav-right { display: flex; align-items: center; gap: 18px; }
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.lang-switch-wrap { display: flex; align-items: center; }
+.lang-switch {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1.5px solid var(--black);
+  background: var(--white);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  padding: 0 8px;
+  height: 34px;
+  cursor: pointer;
+  color: var(--black);
+  min-width: 52px;
+}
 .nav-search-wrap {
   display: flex; align-items: center;
   border: 1.5px solid var(--black);
@@ -1598,6 +1625,7 @@ footer {
   .nav-search-wrap { display: none; }
   #wishlist-btn, #user-btn { display: none; }
   .nav-right .nav-hamburger { display: none; } /* hide desktop hamburger */
+  .lang-switch { height: 28px; min-width: 44px; font-size: 11px; padding: 0 4px; }
 
   /* ── Hero: compact ── */
   .hero-text { padding: 28px 20px; }

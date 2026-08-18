@@ -1,4 +1,6 @@
 import type { Metadata, Viewport } from 'next';
+import { NextIntlClientProvider } from 'next-intl';
+import { getLocale, getMessages, getTranslations } from 'next-intl/server';
 import './globals.css';
 import { StoreProvider } from '@/storefront/lib/StoreContext';
 import { Ticker } from '@/storefront/components/Ticker';
@@ -16,24 +18,30 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
-export const metadata: Metadata = {
-  title: {
-    template: 'Kindard | %s',
-    default: 'Kindard',
-  },
-  description: "KINDARD KIDS — Premium streetwear for the little ones who start trends. Summer Edition 2026.",
-  icons: {
-    icon: '/img/kindard_icon.png',
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('meta');
+  return {
+    title: {
+      template: 'Kindard | %s',
+      default: t('homeTitle'),
+    },
+    description: t('homeDescription'),
+    icons: {
+      icon: '/img/kindard_icon.png',
+    },
+  };
+}
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="en" data-bs-theme="light">
+    <html lang={locale} data-bs-theme="light">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" />
@@ -41,24 +49,26 @@ export default function RootLayout({
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500&display=swap" />
       </head>
       <body suppressHydrationWarning={true}>
-        <StoreProvider>
-          <Ticker />
-          <Nav />
-          
-          <main>
-            {children}
-          </main>
+        <NextIntlClientProvider messages={messages}>
+          <StoreProvider>
+            <Ticker />
+            <Nav />
+            
+            <main>
+              {children}
+            </main>
 
-          <Footer />
+            <Footer />
 
-          {/* Slide-over Panels & Overlays */}
-          <DetailPanel />
-          <CartPanel />
-          <MenuOverlay />
-          
-          {/* Mobile Bottom Navigation */}
-          <MobBottomNav />
-        </StoreProvider>
+            {/* Slide-over Panels & Overlays */}
+            <DetailPanel />
+            <CartPanel />
+            <MenuOverlay />
+            
+            {/* Mobile Bottom Navigation */}
+            <MobBottomNav />
+          </StoreProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

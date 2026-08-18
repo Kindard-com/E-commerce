@@ -44,7 +44,7 @@ pnpm run test:unit    # Medusa JS SDK namespaces + product mapper
 pnpm run test:sdk     # live smoke test against a running Medusa backend
 ```
 
-Latest unit result: **3/3 passed** (`docs/proof/sdk-test.json`).
+Latest unit result: **7/7 passed** (`pnpm run test:unit`), including locale routing + translation-key sync.
 
 The storefront loads **live Medusa products** through `@medusajs/js-sdk`. The bag, checkout, and customer portal talk to the same backend. Fake catalog items are no longer sold.
 
@@ -68,9 +68,13 @@ pnpm run seed:commerce
 pnpm run dev
 ```
 
-5. Shop at `http://localhost:3000`, manage products/orders at `http://localhost:9000/app`.
+5. Shop at `http://localhost:3000` (redirects to a locale-prefixed URL such as `/en`), manage products/orders at `http://localhost:9000/app`.
 
-For live Mollie payments set `MOLLIE_API_KEY` in `backend/.env` (redirect URL is `/checkout/complete`). Without it, checkout still creates **real Medusa orders** via the system payment provider so you can operate locally.
+The storefront is available in **English, Deutsch, Français, Nederlands, and Español**. URLs are locale-prefixed (`/en/buy`, `/de/buy`, `/fr/buy`, `/nl/buy`, `/es/buy`). Visiting `/` redirects to the best match from `Accept-Language` or the `NEXT_LOCALE` cookie. Switch languages from the header selector.
+
+Translation files live in `messages/`. Routing is in `src/middleware.ts` and `src/i18n/routing.ts`. Payload `/admin` and `/api` stay unprefixed.
+
+For live Mollie payments set `MOLLIE_API_KEY` in `backend/.env` (redirect URL is `/checkout/complete`, which then locale-prefixes). Without it, checkout still creates **real Medusa orders** via the system payment provider so you can operate locally.
 
 ---
 

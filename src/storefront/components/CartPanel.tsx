@@ -1,10 +1,12 @@
 "use client";
 
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { useStore } from '../lib/StoreContext';
 import { formatMoney, cartCurrency } from '../lib/money';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 export function CartPanel() {
+  const t = useTranslations('cart');
   const { cart, medusaCart, isCartOpen, setCartOpen, removeFromCart, updateQty, cartLoading, cartError } = useStore();
 
   const currency = cartCurrency(medusaCart)
@@ -16,7 +18,7 @@ export function CartPanel() {
     <>
       <div className={`cart-panel ${isCartOpen ? 'open' : ''}`}>
         <div className="cart-header">
-          <span className="cart-title">Shop Bag {cartLoading && <span style={{ fontSize: '10px', color: 'var(--mid)', marginLeft: '8px' }}>Updating...</span>}</span>
+          <span className="cart-title">{t('title')} {cartLoading && <span style={{ fontSize: '10px', color: 'var(--mid)', marginLeft: '8px' }}>{t('updating')}</span>}</span>
           <button className="close-btn" onClick={() => setCartOpen(false)}>✕</button>
         </div>
         
@@ -26,7 +28,7 @@ export function CartPanel() {
           )}
           {cart.length === 0 ? (
             <div style={{ padding: '24px', textAlign: 'center', fontFamily: "'Barlow Condensed', sans-serif" }}>
-              Your bag is empty.
+              {t('empty')}
             </div>
           ) : (
             cart.map((item, i) => (
@@ -55,7 +57,7 @@ export function CartPanel() {
                       <button className="qty-btn" onClick={() => updateQty(i, item.qty + 1)}>+</button>
                     </div>
                     <div className="cart-item-price">{formatMoney(item.product.price, currency)}</div>
-                    <button className="remove-btn" onClick={() => removeFromCart(i)}>Remove</button>
+                    <button className="remove-btn" onClick={() => removeFromCart(i)}>{t('remove')}</button>
                   </div>
                 </div>
               </div>
@@ -65,18 +67,18 @@ export function CartPanel() {
 
         <div className="cart-footer">
           <div className="cart-totals">
-            <div className="cart-row"><span>Subtotal</span><span>{formatMoney(subtotal, currency)}</span></div>
-            <div className="cart-row"><span>Discount</span><span style={{ color: 'var(--red)' }}>-{formatMoney(discount, currency)}</span></div>
-            <div className="cart-row"><span>Shipping</span><span>{medusaCart?.shipping_total ? formatMoney(medusaCart.shipping_total, currency) : 'Calculated at checkout'}</span></div>
-            <div className="cart-row total"><span>Total</span><span>{formatMoney(total, currency)}</span></div>
+            <div className="cart-row"><span>{t('subtotal')}</span><span>{formatMoney(subtotal, currency)}</span></div>
+            <div className="cart-row"><span>{t('discount')}</span><span style={{ color: 'var(--red)' }}>-{formatMoney(discount, currency)}</span></div>
+            <div className="cart-row"><span>{t('shipping')}</span><span>{medusaCart?.shipping_total ? formatMoney(medusaCart.shipping_total, currency) : t('shippingNext')}</span></div>
+            <div className="cart-row total"><span>{t('total')}</span><span>{formatMoney(total, currency)}</span></div>
           </div>
           
           <div style={{ textAlign: 'center', marginBottom: '12px', fontSize: '11px', color: 'var(--mid)', letterSpacing: '.06em', textTransform: 'uppercase', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> SECURE 256-BIT ENCRYPTED CHECKOUT
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> {t('secure')}
           </div>
 
           <Link href="/checkout" className="checkout-btn" style={{ pointerEvents: cart.length === 0 ? 'none' : 'auto', opacity: cart.length === 0 ? 0.5 : 1, textDecoration: 'none', display: 'flex', justifyContent: 'space-between' }} onClick={() => setCartOpen(false)}>
-            <span>SECURE CHECKOUT</span>
+            <span>{t('checkout')}</span>
             <span>{formatMoney(total, currency)}</span>
           </Link>
           
