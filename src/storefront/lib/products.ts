@@ -1,6 +1,7 @@
 export type Product = {
   id: string | number;
   medusa_id?: string;
+  payload_id?: string | number;
   variants?: any[];
   brand: string;
   name: string;

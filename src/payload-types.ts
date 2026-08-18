@@ -320,6 +320,14 @@ export interface Product {
   };
   categories?: (number | Category)[] | null;
   /**
+   * Storefront image URL (for example /api/images?file=product.png).
+   */
+  storefrontImage?: string | null;
+  /**
+   * Optional Medusa product id to keep CMS copy linked to live commerce.
+   */
+  medusaProductId?: string | null;
+  /**
    * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
   generateSlug?: boolean | null;
@@ -1944,6 +1952,8 @@ export interface ProductsSelect<T extends boolean = true> {
         description?: T;
       };
   categories?: T;
+  storefrontImage?: T;
+  medusaProductId?: T;
   generateSlug?: T;
   slug?: T;
   updatedAt?: T;
