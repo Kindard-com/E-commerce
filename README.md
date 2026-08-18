@@ -65,6 +65,8 @@ pnpm --dir backend install
 pnpm run seed:commerce
 ```
 
+The seed writes `NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY` and `NEXT_PUBLIC_MEDUSA_SALES_CHANNEL_ID` into `.env`. `pnpm run dev:medusa` starts Postgres/Redis if they are local, migrates, then boots Medusa on `:9000`.
+
 3. Copy the printed `NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY` and `NEXT_PUBLIC_MEDUSA_SALES_CHANNEL_ID` into `.env`.
 4. Run the three services:
 

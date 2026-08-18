@@ -391,5 +391,28 @@ export default async function seedDemo({ container }: ExecArgs) {
   logger.info("Set these in the storefront .env:")
   logger.info(`NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=${publishableApiKey.token}`)
   logger.info(`NEXT_PUBLIC_MEDUSA_SALES_CHANNEL_ID=${defaultSalesChannel.id}`)
+
+  try {
+    const { writeFileSync, readFileSync, existsSync } = await import("node:fs")
+    const { resolve } = await import("node:path")
+    const envPath = resolve(process.cwd(), "..", ".env")
+    if (existsSync(envPath)) {
+      let env = readFileSync(envPath, "utf8")
+      const upsert = (key: string, value: string) => {
+        const line = `${key}=${value}`
+        env = env.match(new RegExp(`^${key}=`, "m"))
+          ? env.replace(new RegExp(`^${key}=.*$`, "m"), line)
+          : `${env.trimEnd()}\n${line}\n`
+      }
+      upsert("NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY", publishableApiKey.token)
+      upsert("NEXT_PUBLIC_MEDUSA_SALES_CHANNEL_ID", defaultSalesChannel.id)
+      upsert("NEXT_PUBLIC_MEDUSA_BACKEND_URL", process.env.MEDUSA_URL || "http://127.0.0.1:9000")
+      writeFileSync(envPath, env)
+      logger.info(`Wrote storefront Medusa keys to ${envPath}`)
+    }
+  } catch (error) {
+    logger.warn(`Could not write storefront .env: ${String(error)}`)
+  }
+
   logger.info("Kindard commerce seed complete.")
 }

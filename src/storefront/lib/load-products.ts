@@ -1,6 +1,6 @@
 import { fallbackProducts, type Product } from './products'
 import { mapMedusaProduct } from './medusa-mapper'
-import { medusaClient } from './medusa'
+import { medusaClient, SALES_CHANNEL_ID } from './medusa'
 import { medusaServerClient } from './medusa-server'
 
 const PRODUCT_FIELDS =
@@ -22,30 +22,44 @@ async function getDefaultRegionId(): Promise<string | undefined> {
   }
 }
 
-export async function loadMedusaProducts(limit = 20, query?: string): Promise<ProductCatalogResult> {
-  const regionId = await getDefaultRegionId()
-  const listArgs = {
+function listArgs(limit: number, query?: string, regionId?: string) {
+  return {
     limit,
     fields: PRODUCT_FIELDS,
     ...(query ? { q: query } : {}),
     ...(regionId ? { region_id: regionId } : {}),
+    ...(SALES_CHANNEL_ID ? { sales_channel_id: SALES_CHANNEL_ID } : {}),
   }
+}
 
-  try {
-    const { products } = await medusaClient.store.product.list(listArgs)
-    return {
-      products: (products || []).map(mapMedusaProduct),
-      source: 'medusa-store',
+export async function loadMedusaProducts(limit = 20, query?: string): Promise<ProductCatalogResult> {
+  const regionId = await getDefaultRegionId()
+  const attempts = [
+    listArgs(limit, query, regionId),
+    listArgs(limit, query),
+  ]
+
+  for (const args of attempts) {
+    try {
+      const { products } = await medusaClient.store.product.list(args)
+      if (products?.length) {
+        return {
+          products: products.map(mapMedusaProduct),
+          source: 'medusa-store',
+        }
+      }
+    } catch (error) {
+      console.warn('[medusa] store product list failed', error)
     }
-  } catch (error) {
-    console.warn('[medusa] store product list failed, trying admin API', error)
   }
 
   try {
-    const { products } = await medusaServerClient.admin.product.list(listArgs)
-    return {
-      products: (products || []).map(mapMedusaProduct),
-      source: 'medusa-admin',
+    const { products } = await medusaServerClient.admin.product.list(listArgs(limit, query))
+    if (products?.length) {
+      return {
+        products: products.map(mapMedusaProduct),
+        source: 'medusa-admin',
+      }
     }
   } catch (error) {
     console.warn('[medusa] admin product list failed', error)

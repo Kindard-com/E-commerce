@@ -5,7 +5,7 @@ loadEnv(process.env.NODE_ENV || 'development', process.cwd())
 module.exports = defineConfig({
   projectConfig: {
     databaseUrl: process.env.DATABASE_URL,
-    redisUrl: process.env.REDIS_URL,
+    ...(process.env.REDIS_URL ? { redisUrl: process.env.REDIS_URL } : {}),
     // Medusa 2.15.x forces SSL for non-localhost hosts and can hang db:migrate silently.
     databaseDriverOptions: {
       connection: {
