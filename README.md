@@ -44,13 +44,13 @@ Captured from a live local run of the Next.js storefront (`:3000`) and Kindard C
 
 ```bash
 pnpm install --frozen-lockfile
-pnpm run test:unit    # Medusa JS SDK namespaces + product mapper
+pnpm run test:unit    # Medusa JS SDK, Payload mapper, locale routing
 pnpm run test:sdk     # live smoke test against a running Medusa backend
 ```
 
-Latest unit result: **7/7 passed** (`pnpm run test:unit`), including locale routing + translation-key sync.
+Latest unit result: **13/13 passed** (`pnpm run test:unit`), including locale routing, the Payload product mapper, and Medusa SDK namespaces.
 
-The storefront loads **live Medusa products** through `@medusajs/js-sdk`. The bag, checkout, and customer portal talk to the same backend. Fake catalog items are no longer sold.
+The storefront loads **Payload CMS products** (`/api/products`) and **live Medusa products** through `@medusajs/js-sdk`, then merges them for the shop. The bag, checkout, and customer portal talk to Medusa. Fake catalog items are no longer sold.
 
 ---
 
@@ -63,9 +63,10 @@ The storefront loads **live Medusa products** through `@medusajs/js-sdk`. The ba
 pnpm install --frozen-lockfile
 pnpm --dir backend install
 pnpm run seed:commerce
+pnpm run seed:cms
 ```
 
-The seed writes `NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY` and `NEXT_PUBLIC_MEDUSA_SALES_CHANNEL_ID` into `.env`. `pnpm run dev:medusa` starts Postgres/Redis if they are local, migrates, then boots Medusa on `:9000`.
+The commerce seed writes `NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY` and `NEXT_PUBLIC_MEDUSA_SALES_CHANNEL_ID` into `.env`. `pnpm run seed:cms` publishes the Kindard catalog into Payload so `/api/products` and the storefront both have CMS records. The shop merges published Payload products with live Medusa commerce data. `pnpm run dev:medusa` starts Postgres/Redis if they are local, migrates, then boots Medusa on `:9000`.
 
 3. Copy the printed `NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY` and `NEXT_PUBLIC_MEDUSA_SALES_CHANNEL_ID` into `.env`.
 4. Run the three services:

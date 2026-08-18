@@ -80,7 +80,7 @@ export const ProductsCollection: CollectionOverride = ({ defaultCollection }) =>
             {
               name: 'gallery',
               type: 'array',
-              minRows: 1,
+              minRows: 0,
               fields: [
                 {
                   name: 'image',
@@ -206,6 +206,23 @@ export const ProductsCollection: CollectionOverride = ({ defaultCollection }) =>
       },
       hasMany: true,
       relationTo: 'categories',
+    },
+    {
+      name: 'storefrontImage',
+      type: 'text',
+      admin: {
+        position: 'sidebar',
+        description: 'Storefront image URL (for example /api/images?file=product.png).',
+      },
+    },
+    {
+      name: 'medusaProductId',
+      type: 'text',
+      index: true,
+      admin: {
+        position: 'sidebar',
+        description: 'Optional Medusa product id to keep CMS copy linked to live commerce.',
+      },
     },
     slugField(),
   ],

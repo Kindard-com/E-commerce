@@ -48,6 +48,7 @@ export function ProductCard({ product }: { product: Product }) {
             src={product.image} 
             alt={product.name} 
             fill 
+            loading="eager"
             sizes="(max-width: 768px) 50vw, 33vw"
             style={{ objectFit: 'cover' }} 
           />

@@ -28,6 +28,7 @@ const nextConfig: NextConfig = {
       },
       {
         pathname: '/api/images',
+        search: '?file=*',
       },
       {
         pathname: '/img/**',
@@ -46,6 +47,20 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'medusa-public-images.s3.eu-west-1.amazonaws.com',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '3000',
+        pathname: '/api/images',
+        search: '?file=*',
+      },
+      {
+        protocol: 'http',
+        hostname: '127.0.0.1',
+        port: '3000',
+        pathname: '/api/images',
+        search: '?file=*',
       },
     ],
   },

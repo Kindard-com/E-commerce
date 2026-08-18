@@ -1,4 +1,5 @@
 import { Product } from './products';
+import { normalizeStorefrontImage } from './storefront-image';
 
 const CATEGORY_ALIASES: Record<string, string> = {
   shirts: 'tees',
@@ -100,7 +101,7 @@ export function mapMedusaProduct(storeProduct: any): Product {
     price: minPrice,
     orig: originalPrice,
     discount: discount,
-    image: storeProduct.thumbnail || storeProduct.images?.[0]?.url || undefined,
+    image: normalizeStorefrontImage(storeProduct.thumbnail || storeProduct.images?.[0]?.url),
     dark: false,
     colors: finalColors,
     sizes: finalSizes,
