@@ -18,9 +18,13 @@ Captured from a live local run of the Next.js storefront (`:3000`) and Kindard C
 
 ### Storefront
 
-![Kindard homepage](docs/proof/storefront-home.png)
+![Kindard homepage (English)](docs/proof/storefront-home.png)
 
-![New arrivals](docs/proof/storefront-new-arrivals.png)
+![Shop /en/buy](docs/proof/storefront-buy-en.png)
+
+![Shop /de/buy](docs/proof/storefront-buy-de.png)
+
+![Tees category](docs/proof/storefront-new-arrivals.png)
 
 ![Product page](docs/proof/storefront-product.png)
 
@@ -28,7 +32,7 @@ Captured from a live local run of the Next.js storefront (`:3000`) and Kindard C
 
 ![Payload create first user](docs/proof/payload-admin.png)
 
-![CDN health operational](docs/proof/cdn-health.png)
+![CDN system health](docs/proof/cdn-health.png)
 
 ### Demo video
 

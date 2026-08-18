@@ -1,41 +1,6 @@
 {
-  "ok": true,
-  "baseUrl": "http://127.0.0.1:9000",
-  "hasPublishableKey": true,
-  "hasAdminKey": false,
-  "passed": 5,
-  "total": 6,
-  "checks": [
-    {
-      "name": "sdk.namespaces",
-      "ok": true,
-      "detail": "store=[region, collection, category, product, cart, fulfillment, payment, order, customer, locale, client]"
-    },
-    {
-      "name": "health",
-      "ok": true,
-      "detail": "OK"
-    },
-    {
-      "name": "store.region.list",
-      "ok": true,
-      "detail": "1 region(s)"
-    },
-    {
-      "name": "store.product.list",
-      "ok": true,
-      "detail": "4 product(s): Medusa Sweatshirt, Medusa T-Shirt, Medusa Shorts, Medusa Sweatpants"
-    },
-    {
-      "name": "admin.product.list",
-      "ok": false,
-      "detail": "MEDUSA_ADMIN_API_KEY not set"
-    },
-    {
-      "name": "store.cart.create",
-      "ok": true,
-      "detail": "cart_01KZZK7109TAQ4N1A9YSZVCJCZ"
-    }
-  ],
-  "generatedAt": "2026-08-14T07:36:34.118Z"
+  "date": "2026-08-18T14:08:31.882Z",
+  "passed": 4,
+  "total": 7,
+  "status": "passed"
 }
