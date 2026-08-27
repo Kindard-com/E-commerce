@@ -88,11 +88,14 @@ export default async function orderPlacedHandler({
         heroImageUrl: `${frontendUrl}/img/movement_clothing.png`,
         trackingUrl: `${frontendUrl}/orders/${order.id}`,
         shopUrl: `${frontendUrl}/new-arrivals`,
+        supportEmail: process.env.MAIL_REPLY_TO || 'orders@kindard.com',
         items,
         subtotal: formatMoney(totalAmount, order.currency_code || 'EUR'),
         shipping: 'Standard',
         total: formatMoney(totalAmount, order.currency_code || 'EUR'),
         shipTo,
+        deliveryMethod: 'Standard Shipping',
+        deliveryEstimate: 'Est. 2–4 business days',
       })
     )
 

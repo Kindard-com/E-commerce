@@ -69,7 +69,6 @@ This project is configured with a fully automated React Email + Nodemailer integ
 
 Make sure your backend `.env` contains:
 ```env
-DOMAIN=kindard.com
 FRONTEND_URL=https://kindard.com
 SMTP_HOST=mail.privateemail.com
 SMTP_PORT=587
@@ -77,9 +76,11 @@ SMTP_SECURE=false
 SMTP_USER=orders@kindard.com
 SMTP_PASS=YOUR_REAL_PASSWORD
 MAIL_FROM="Kindard Orders <orders@kindard.com>"
-MAIL_REPLY_TO=support@kindard.com
+MAIL_REPLY_TO=orders@kindard.com
 ```
 *Note: Never hardcode these inside the codebase, and do not put them in the Next.js frontend.*
+
+**DNS (required for inbox delivery):** `kindard.com` nameservers are currently `nsn1/nsn2.mijndomein.nl`. Add the Private Email MX, SPF, and DKIM records in the **mijndomein** DNS panel (not only in Namecheap), or Gmail may spam/reject messages even when SMTP auth succeeds.
 
 ### How automatic order emails work
 When a customer places an order via the frontend, the `order.placed` subscriber (`src/subscribers/order-placed.ts`) executes. It queries the newly created order using the Medusa graph API, renders the React Email template (`src/emails/KindardOrderConfirmationEmail.tsx`), and uses Nodemailer to dispatch it.

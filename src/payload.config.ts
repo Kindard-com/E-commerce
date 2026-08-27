@@ -81,14 +81,16 @@ export default buildConfig({
     },
   }),
   email: nodemailerAdapter({
-    defaultFromAddress: 'support@kindard.com',
-    defaultFromName: 'Kindard Support',
+    defaultFromAddress: process.env.SMTP_USER || 'orders@kindard.com',
+    defaultFromName: 'Kindard Orders',
     transportOptions: {
-      host: process.env.SMTP_HOST || 'smtp.ethereal.email',
+      host: process.env.SMTP_HOST || 'mail.privateemail.com',
       port: parseInt(process.env.SMTP_PORT || '587'),
+      secure: process.env.SMTP_SECURE === 'true',
+      requireTLS: process.env.SMTP_SECURE !== 'true',
       auth: {
-        user: process.env.SMTP_USER || 'ethereal.user@ethereal.email',
-        pass: process.env.SMTP_PASS || 'etherealpass',
+        user: process.env.SMTP_USER || 'orders@kindard.com',
+        pass: process.env.SMTP_PASS || '',
       },
     },
   }),
