@@ -9,12 +9,16 @@ interface SendMailOptions {
 
 export async function sendMail({ to, subject, html, text }: SendMailOptions) {
   try {
+    if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
+      throw new Error('SMTP_HOST, SMTP_USER, and SMTP_PASS must be set')
+    }
+
     // Note: Do not hardcode SMTP credentials here.
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: parseInt(process.env.SMTP_PORT || '587', 10),
       secure: process.env.SMTP_SECURE === 'true', // true for 465, false for 587 (STARTTLS)
-      requireTLS: true, // Force STARTTLS upgrade before authentication (required by privateemail.com)
+      requireTLS: process.env.SMTP_SECURE !== 'true', // Private Email expects STARTTLS on 587
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
@@ -23,7 +27,7 @@ export async function sendMail({ to, subject, html, text }: SendMailOptions) {
 
     const info = await transporter.sendMail({
       from: process.env.MAIL_FROM || '"Kindard Orders" <orders@kindard.com>',
-      replyTo: process.env.MAIL_REPLY_TO || 'support@kindard.com',
+      replyTo: process.env.MAIL_REPLY_TO || 'orders@kindard.com',
       to,
       subject,
       html,
